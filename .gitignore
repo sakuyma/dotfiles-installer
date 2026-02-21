@@ -1,0 +1,15 @@
+# Rust
+/target/
+Cargo.lock
+
+*.swp
+*~
+.DS_Store
+
+# Logs 
+*.log
+install.log
+
+# Temp files 
+*.tmp
+*.bak
