@@ -103,7 +103,7 @@ pub fn install_pacman_packages(requested_groups: &[&str]) -> Result<(), String> 
     }
 
     let pkg_list = packages.join(" ");
-    let cmd = format!("sudo pacman -S --noconfirm {}", pkg_list);
+    let cmd = format!("sudo pacman -S --noconfirm --needed {}", pkg_list);
 
     let status = Command::new("sh")
         .arg("-c")
