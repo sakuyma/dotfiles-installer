@@ -1,11 +1,12 @@
 use std::process::Command;
 
-/// Check if program is running as root
+// Check if we're root
+// because Intel drivers need admin privileges (they're fancy like that)
 fn is_root() -> bool {
     std::env::var("USER").map(|u| u == "root").unwrap_or(false)
 }
 
-/// Check if a package is already installed
+// Ask pacman if a package exists
 fn check_package_installed(pkg: &str) -> bool {
     Command::new("pacman")
         .args(&["-Q", pkg])
@@ -14,11 +15,13 @@ fn check_package_installed(pkg: &str) -> bool {
         .unwrap_or(false)
 }
 
-/// Install Intel drivers using pacman
+// Install Intel drivers - the blue team special
+// (these actually work out of the box, unlike some others)
 fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
-    println!("Checking Intel drivers...");
+    println!("Checking Intel drivers... (the reliable ones)");
     
-    // List of Intel driver packages
+    // The sacred Intel packages
+    // (they've been around since the dawn of time)
     let packages = [
         "mesa",
         "lib32-mesa", 
@@ -27,7 +30,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
         "lib32-vulkan-intel",
     ];
     
-    // Check if all packages are already installed
+    // See what's already there (probably everything, Intel users are lucky)
     let mut all_installed = true;
     let mut missing_packages = Vec::new();
     
@@ -39,12 +42,13 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     }
     
     if all_installed {
-        println!("All Intel drivers are already installed");
+        println!("Intel drivers already installed (typical Intel - already there when you need them)");
         return Ok(true);
     }
     
-    println!("Installing Intel drivers: {:?}", missing_packages);
+    println!("Installing Intel drivers: {:?} (boring but functional)", missing_packages);
     
+    // Call pacman (the friendly neighborhood package manager)
     let status = Command::new("pacman")
         .args(&[
             "-S",
@@ -59,35 +63,35 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
         .status()?;
     
     if status.success() {
-        println!("Intel drivers installed successfully");
+        println!("Intel drivers installed! They work so well you'll forget they're there");
         Ok(true)
     } else {
-        Err(format!("pacman failed with error code: {}", status).into())
+        Err(format!("pacman had a moment: {}", status).into())
     }
 }
 
-/// Main setup function for Intel drivers
+// The main event - Intel driver installation (the boring, reliable kind)
 pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Setting up Intel drivers...");
+    println!("Setting up Intel drivers... (it's gonna be uneventful, promise)");
     
-    // Check if running as root
+    // Root check - because even Intel needs permissions sometimes
     if !is_root() {
-        return Err("This command requires root privileges. Run with sudo".into());
+        return Err("Root privileges required. Intel doesn't work for free (but almost)".into());
     }
     
-    // Install drivers
+    // Install the drivers (they'll probably just work)
     match install_drivers() {
         Ok(true) => {
-            println!("Intel drivers setup completed successfully!");
-            println!("You may need to reboot for changes to take effect");
+            println!("Intel drivers setup complete! Your graphics will now be... adequate");
+            println!("You can reboot, or not, Intel doesn't care either way");
             Ok(())
         }
         Ok(false) => {
-            println!("No changes were made");
+            println!("Nothing changed (Intel was already perfect)");
             Ok(())
         }
         Err(e) => {
-            eprintln!("Error installing Intel drivers: {}", e);
+            eprintln!("Intel drivers failed to install (this never happens): {}", e);
             Err(e)
         }
     }
