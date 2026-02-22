@@ -1,10 +1,11 @@
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions, read_to_string};
 use std::io::Write;
 use std::path::PathBuf;
+use std::env;
 
-pub fn laptop_mode() {
-    let home = std::env::var("HOME").expect("HOME не найден");
-    let hyprland_conf = PathBuf::from(home).join(".config/hypr/hyprland.conf");
+pub fn laptop_mode() -> Result<(), Box<dyn std::error::Error>> {
+    let home = env::var("HOME").expect("HOME не найден");
+    let hyprland_conf = PathBuf::from(&home).join(".config/hypr/hyprland.conf");
 
     let source_line = "source = ./modules/laptop.conf";
 
@@ -18,7 +19,7 @@ pub fn laptop_mode() {
 
     // Create directory (for sure)
     if let Some(parent) = hyprland_conf.parent() {
-        std::fs::create_dir_all(parent)?;
+        fs::create_dir_all(parent)?;
     }
 
     // Add laptop mode

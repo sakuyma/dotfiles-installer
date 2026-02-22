@@ -1,11 +1,15 @@
 use git2::Repository;
 use std::path::Path;
 
-pub fn clone_repo() -> Result<(), git2::Error> {
+pub fn clone_repo() -> Result<(), Box<dyn std::error::Error>> {
     let url = "https://github.com/sakuyma/dotfiles";
-    let path = Path::new(&std::env::var("HOME").unwrap_or_else(|_| ".".to_string())).join(".dotfiles");
-    let repo = match Repository::clone(url, path) {
-        Ok(repo) => repo,
-        Err(e) => Err(format!(Failed to clone: {}", e)),
-    };
+    let home = std::env::var("HOME")?; 
+    let path = Path::new(&home).join(".dotfiles");
+   
+        match Repository::clone(url, &path) {
+        Ok(_) => {
+            Ok(())
+        }
+        Err(e) => Err(format!("Error while cloning dotfiles repository: {}", e).into()),
+    }
 }

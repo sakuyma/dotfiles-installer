@@ -6,8 +6,7 @@ use std::process::Command;
 static CONFIG_PATH: &str = "/etc/mkinitcpio.conf";
 static MODULES: &str = "amdgpu radeon";
 
-fn install_drivers() {
-    let cmd = format!("sudo pacman -S --noconfirm --needed");
+fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     let status = Command::new("pacman")
         .args(&[
             "-S",
@@ -15,7 +14,7 @@ fn install_drivers() {
             "--needed",
             "mesa",
             "lib32-mesa",
-            "vulcan-radeon",
+            "vulkan-radeon",
             "lib32-vulcan-radeon",
         ])
         .status()?;
@@ -61,7 +60,8 @@ fn mkinitcpio() -> io::Result<bool> {
     Ok(modified)
 }
 
-pub fn setup() {
-    install_drivers();
-    mkinitcpio();
+pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
+    install_drivers()?;
+    mkinitcpio()?;
+    Ok(())
 }

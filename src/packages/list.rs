@@ -5,7 +5,6 @@ pub struct PackageGroup {
     pub name: &'static str,
     pub packages: Vec<&'static str>,
     pub dependencies: Vec<&'static str>, // dependencies for package groups
-    
 }
 pub fn get_all_groups() -> HashMap<&'static str, PackageGroup> {
     let mut groups = HashMap::new();
@@ -70,7 +69,7 @@ pub fn get_all_groups() -> HashMap<&'static str, PackageGroup> {
             name: "dev",
             packages: vec![
                 "neovim",
-                "vscodium-bin"
+                "vscodium-bin",
                 "yazi",
                 "7zip",
                 "jq",
@@ -103,6 +102,14 @@ pub fn get_all_groups() -> HashMap<&'static str, PackageGroup> {
                 "tldr",
             ],
             dependencies: vec!["aur", "base"],
+        },
+    );
+    groups.insert(
+        "all",
+        PackageGroup {
+            name: "all",
+            packages: vec![],
+            dependencies: vec!["base", "rust", "aur", "de", "dev"],
         },
     );
     return groups;

@@ -1,9 +1,11 @@
-use std::path::{Path, PathBuf};
-use std::proces::Comand;
+use std::path::Path;
+use std::process::Command;
+use std::env;
 
 pub fn stow_config() -> Result<(), String> {
-    let stow_dir = expand_path(Path::new("~/.dotfiles/config"));
-    let target_dir = expand_path(Path::new("~"));
+    let home = env::var("HOME").map_err(|e| format!("HOME not found: {}", e))?;
+    let stow_dir = Path::new(&home).join(".dotfiles/config");
+    let target_dir = Path::new(&home);
 
     if !stow_dir.exists() {
         return Err(format!("Directory {:?} doesnt exists", stow_dir));
@@ -18,7 +20,7 @@ pub fn stow_config() -> Result<(), String> {
         .status()
         .map_err(|e| format!("Error: {}", e))?;
 
-    if status.succes() {
+    if status.success() {
         Ok(())
     } else {
         Err("Error while running stow".to_string())

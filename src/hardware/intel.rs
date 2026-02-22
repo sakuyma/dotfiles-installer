@@ -1,7 +1,6 @@
 use std::process::Command;
 
-fn install_drivers() {
-    let cmd = format!("sudo pacman -S --noconfirm --needed");
+fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     let status = Command::new("pacman")
         .args(&[
             "-S",
@@ -10,12 +9,14 @@ fn install_drivers() {
             "mesa",
             "lib32-mesa",
             "xf86-video-intel",
+            "vulkan-intel",
             "lib32-vulcan-intel",
         ])
         .status()?;
     Ok(status.success())
 }
 
-pub fn setup() {
+pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
     install_drivers();
+    Ok(())
 }

@@ -4,10 +4,9 @@ use std::path::Path;
 use std::process::Command;
 
 static CONFIG_PATH: &str = "/etc/mkinitcpio.conf";
-static MODULES: &str = " i915 nvidia nvidia_modeset nvidia_uvm nvidia_drm";
+static MODULES: &str = "i915 nvidia nvidia_modeset nvidia_uvm nvidia_drm";
 
-fn install_drivers() {
-    let cmd = format!("sudo pacman -S --noconfirm --needed");
+fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     let status = Command::new("pacman")
         .args(&[
             "-S",
@@ -15,7 +14,7 @@ fn install_drivers() {
             "--needed",
             "nvidia-open",
             "nvidia-utils",
-            "lib-32-nvidia-utils",
+            "lib32-nvidia-utils",
             "egl-wayland",
         ])
         .status()?;
@@ -61,7 +60,8 @@ fn mkinitcpio() -> io::Result<bool> {
     Ok(modified)
 }
 
-pub fn setup() {
-    install_drivers();
-    mkinitcpio();
+pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
+    install_drivers()?;
+    mkinitcpio()?;
+    Ok(())
 }

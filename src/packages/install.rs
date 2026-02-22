@@ -5,12 +5,12 @@ use std::collections::{HashMap, HashSet};
 fn is_aur_group(
     group_name: &str, 
     groups: &HashMap<&'static str, list::PackageGroup>,
-    checked: &mut HashSet<&'static str>
+    checked: &mut HashSet<String>,
 ) -> bool {
     if checked.contains(group_name) {
         return false;
     }
-    checked.insert(group_name);
+    checked.insert(group_name.to_string());
     
     if let Some(group) = groups.get(group_name) {
         if group_name == "aur" {
@@ -71,7 +71,7 @@ fn collect_packages_by_type(
     group_name: &str,
     groups: &HashMap<&'static str, list::PackageGroup>,
     result: &mut Vec<&'static str>,
-    processed: &mut HashSet<&'static str>,
+    processed: &mut HashSet<String>,
     want_aur: bool, // true -  AUR, false - not AUR
 ) {
     if processed.contains(group_name) {
@@ -91,7 +91,7 @@ fn collect_packages_by_type(
             result.extend(group.packages.clone());
         }
         
-        processed.insert(group_name);
+        processed.insert(group_name.to_string());
     }
 }
 
@@ -137,6 +137,9 @@ pub fn install_aur_packages(requested_groups: &[&str]) -> Result<(), String> {
         .map_err(|e| format!("Error running: {}", e))?;
     
     if status.success() {
+        Ok(())
+    } else {
+        eprintln!("Error");
         Ok(())
     }
 }
