@@ -61,7 +61,7 @@ fn mkinitcpio() -> io::Result<bool> {
     Ok(modified)
 }
 
-pub fn install() {
+pub fn setup() {
     install_drivers();
     mkinitcpio();
 }

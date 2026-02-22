@@ -16,6 +16,6 @@ fn install_drivers() {
     Ok(status.success())
 }
 
-pub fn install() {
+pub fn setup() {
     install_drivers();
 }

@@ -120,7 +120,8 @@ pub fn get_installation_order(requested_groups: &[&str]) -> Vec<Vec<&'static str
 
         for &group_name in &remaining {
             if let Some(group) = groups.get(group_name) {
-                // Check if dep installed
+                // Check if all dependencies are satisfied
+                // (like a startup chain but for packages)
                 let deps_installed = group
                     .dependencies
                     .iter()
@@ -136,13 +137,15 @@ pub fn get_installation_order(requested_groups: &[&str]) -> Vec<Vec<&'static str
         }
 
         if current_round.is_empty() && !still_remaining.is_empty() {
-            // Cycle of dependencies
+            // Were stuck, someone created circular dependency
+            // good luck debuggins THIS nightmare
             println!("Cycle of dependies : {:?}", still_remaining);
             break;
         }
 
         if !current_round.is_empty() {
-            // How to even comment this
+            // Sort to group duplicates, then dedup to remove them
+            // (yeah, i could use a HashSet, but this was written at 3 am)
             current_round.sort();
             current_round.dedup();
             result.push(current_round);
@@ -159,8 +162,8 @@ pub fn get_packages_with_order(requested_groups: &[&str]) -> Vec<&'static str> {
     let order = get_installation_order(requested_groups);
     order.into_iter().flatten().collect()
 }
-
-// Check if dependencies is right
+// This dependency resolver is held together by god and regex
+// DO NOT TOUCH unless you enjoy untangling circular dependencies
 pub fn check_dependencies(group_name: &str) -> Vec<&'static str> {
     let groups = get_all_groups();
     let mut deps = Vec::new();
@@ -191,3 +194,4 @@ pub fn check_dependencies(group_name: &str) -> Vec<&'static str> {
 }
 
 // Holy shitcode
+// (but it works, somehow)
