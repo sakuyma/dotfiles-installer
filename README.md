@@ -38,19 +38,19 @@ dotfiles-installer
 
 ## Project structure
 .
-├── configs/          # Dotfile management
-│   ├── clone.rs      # Git clone (please work)
-│   ├── install.rs    # Stow magic
-│   └── laptop.rs     # Power saving tricks
-├── hardware/         # GPU driver mayhem
-│   ├── amd.rs        # Red team
-│   ├── intel.rs      # Blue team  
-│   ├── nvidia.rs     # Green team (good luck)
-│   └── videocard.rs  # GPU detector 9000
-├── packages/         # Package management
-│   ├── install.rs    # Pacman + paru = love
-│   └── list.rs       # Package groups (endless list)
-└── main.rs           # Where the magic (or tragedy) begins
+    configs/          # Dotfile management
+        clone.rs      # Git clone (please work)
+        install.rs    # Stow magic
+        laptop.rs     # Power saving tricks
+    hardware/         # GPU driver mayhem
+        amd.rs        # Red team
+        intel.rs      # Blue team  
+        nvidia.rs     # Green team (good luck)
+        videocard.rs  # GPU detector 9000
+    packages/         # Package management
+        install.rs    # Pacman + paru = love
+        list.rs       # Package groups (endless list)
+    main.rs           # Where the magic (or tragedy) begins
 
 ## Requirements
 - Arch Linux (btw)
