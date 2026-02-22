@@ -42,7 +42,7 @@ pub fn setup_driver() -> Result<(), Box<dyn std::error::Error>> {
         // b) gfxinfo doesn't recognize it
         // c) They're running in a VM and this whole thing was doomed anyway
         _unknown => {
-            eprintln!("Unknown Gpu: {}", vendor);
+            eprintln!("Unknown Gpu: {}", vendor),
             Ok(())
         }
     }
