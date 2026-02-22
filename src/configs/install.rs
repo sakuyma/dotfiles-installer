@@ -1,6 +1,6 @@
+use std::env;
 use std::path::Path;
 use std::process::Command;
-use std::env;
 
 pub fn stow_config() -> Result<(), String> {
     let home = env::var("HOME").map_err(|e| format!("HOME not found: {}", e))?;

@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if hardware::hardware::is_laptop() {
         configs::laptop::laptop_mode()?;
     }
-    
+
     hardware::videocard::setup_driver()?;
 
     let groups = vec!["all"];

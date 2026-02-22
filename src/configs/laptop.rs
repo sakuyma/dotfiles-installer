@@ -1,7 +1,7 @@
+use std::env;
 use std::fs::{self, OpenOptions, read_to_string};
 use std::io::Write;
 use std::path::PathBuf;
-use std::env;
 
 pub fn laptop_mode() -> Result<(), Box<dyn std::error::Error>> {
     let home = env::var("HOME").expect("HOME не найден");
@@ -28,7 +28,7 @@ pub fn laptop_mode() -> Result<(), Box<dyn std::error::Error>> {
         .create(true)
         .open(hyprland_conf)?;
 
-    // Idk 
+    // Idk
     if file.metadata()?.len() > 0 {
         writeln!(file)?;
     }
