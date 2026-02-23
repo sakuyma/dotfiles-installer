@@ -26,32 +26,37 @@ fn check_package_installed(pkg: &str) -> bool {
 // (unlike some other GPU vendors *cough* NVIDIA *cough*)
 fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     println!("Checking AMD drivers... (the open source ones, because AMD is cool like that)");
-
+    
     // The holy list of AMD packages
     // (all open source, all free, all glorious)
-    let packages = ["mesa", "lib32-mesa", "vulkan-radeon", "lib32-vulkan-radeon"];
-
+    let packages = vec![
+        "mesa",
+        "lib32-mesa",
+        "vulkan-radeon",
+        "lib32-vulkan-radeon",
+    ];
+    
     // Check what's already installed (hopefully everything)
     let mut all_installed = true;
     let mut missing_packages = Vec::new();
-
+    
     for &pkg in &packages {
         if !check_package_installed(pkg) {
             all_installed = false;
             missing_packages.push(pkg);
         }
     }
-
+    
     if all_installed {
         println!("AMD drivers already installed (someone has good taste)");
         return Ok(true);
     }
-
+    
     println!(
         "Installing AMD drivers: {:?} (the way Linus intended)",
         missing_packages
     );
-
+    
     // Summon pacman (the friendly version, not the video game character)
     let status = Command::new("pacman")
         .args(vec![
@@ -64,7 +69,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
             "lib32-vulkan-radeon",
         ])
         .status()?;
-
+    
     if status.success() {
         println!("AMD drivers installed! Your GPU is now free as in freedom");
         Ok(true)
@@ -90,7 +95,7 @@ fn backup_config(path: &Path) -> io::Result<()> {
 fn mkinitcpio() -> io::Result<bool> {
     let config_path = Path::new(CONFIG_PATH);
     let new_modules = MODULES;
-
+    
     // Does the file exist? It should. It really should.
     if !config_path.exists() {
         return Err(io::Error::new(
@@ -98,15 +103,15 @@ fn mkinitcpio() -> io::Result<bool> {
             format!("Config file {} is playing hide and seek", CONFIG_PATH),
         ));
     }
-
+    
     // Backup in case we mess up (we probably won't, but still)
     backup_config(config_path)?;
-
+    
     // Read the ancient scrolls
     let content = fs::read_to_string(config_path)?;
     let mut lines: Vec<String> = Vec::new();
     let mut modified = false;
-
+    
     // Parse each line like it's 1995 and we're writing HTML by hand
     for line in content.lines() {
         if line.trim_start().starts_with("MODULES=")
@@ -144,7 +149,7 @@ fn mkinitcpio() -> io::Result<bool> {
             lines.push(line.to_string());
         }
     }
-
+    
     // Commit changes to the system (scary stuff)
     if modified {
         fs::write(config_path, lines.join("\n"))?;

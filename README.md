@@ -15,7 +15,7 @@ A Rust-powered tool to set up your Arch Linux system with dotfiles, drivers, and
 - Arch Linux (btw)
 - git and stow (install them if you havent)
 - paru for AUR packages
-- Root priviges (because touching system files is fun)
+- Root priviliges (because touching system files is fun)
 
 ## Installation
 
@@ -45,25 +45,24 @@ dotfiles-installer
 6. If you're on a laptop, enables laptop mode (battery savings)
 
 ## Project structure
-
 .
-├── configs  
-│   ├── clone.rs  
-│   ├── install.rs  
-│   ├── laptop.rs  
-│   └── mod.rs  
-├── hardware  
-│   ├── amd.rs  
-│   ├── hardware.rs  
-│   ├── intel.rs  
-│   ├── mod.rs  
-│   ├── nvidia.rs  
-│   └── videocard.rs  
-├── main.rs  
-└── packages  
- ├── install.rs  
- ├── list.rs  
- └── mod.rs
+├── configs              
+│   ├── clone.rs       
+│   ├── install.rs     
+│   ├── laptop.rs      
+│   └── mod.rs         
+├── hardware           
+│   ├── amd.rs         
+│   ├── hardware.rs    
+│   ├── intel.rs       
+│   ├── mod.rs         
+│   ├── nvidia.rs      
+│   └── videocard.rs   
+├── main.rs            
+└── packages           
+    ├── install.rs     
+    ├── list.rs        
+    └── mod.rs         
 
 ## TODO
 
