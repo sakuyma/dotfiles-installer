@@ -7,11 +7,11 @@ use std::fs;
 pub fn get_architecture() -> bool {
     let arch = env::consts::ARCH.to_string();
     if arch == "x86_64" {
-        return true;
+        true
     } else {
         eprintln!("ARM detected - I have no idea what you're doing here");
         eprintln!("(seriously, ARM support is not a thing... yet)");
-        return false;
+        false
     }
 }
 
@@ -36,17 +36,15 @@ pub fn is_laptop() -> bool {
 
                 // Double-check that this is actually a Battery and not
                 // some other weird power supply device the system invented
-                if let Ok(typ) = fs::read_to_string(path) {
-                    if typ.trim() == "Battery" {
+                if let Ok(typ) = fs::read_to_string(path) && typ.trim() == "Battery" {
                         return true;
-                    }
                 }
             }
         }
     }
     // No battery found - either a desktop or a VM
     // (or the system is using some weird non-standard power setup)
-    return false;
+    false
 }
 
 #[cfg(test)]

@@ -15,7 +15,7 @@ pub fn stow_config() -> Result<(), String> {
         .current_dir(&stow_dir)
         .arg(".")
         .arg("-t")
-        .arg(&target_dir)
+        .arg(target_dir)
         .arg("--restow")
         .status()
         .map_err(|e| format!("Error: {}", e))?;

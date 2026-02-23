@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     configs::install::stow_config()?;
 
-    if hardware::hardware::is_laptop() {
+    if hardware::utils::is_laptop() {
         configs::laptop::laptop_mode()?;
     }
 
