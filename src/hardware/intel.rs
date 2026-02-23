@@ -72,10 +72,6 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
 
 // The main event - Intel driver installation (the boring, reliable kind)
 pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
-<<<<<<< HEAD
-    let _ = install_drivers();
-    Ok(())
-=======
     println!("Setting up Intel drivers... (it's gonna be uneventful, promise)");
     
     // Root check - because even Intel needs permissions sometimes
@@ -99,5 +95,22 @@ pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
             Err(e)
         }
     }
->>>>>>> feature/refactor
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_check_package_installed() {
+        // Testing with something that definitely doesn't exist
+        // (unlike Intel's market presence)
+        assert!(!check_package_installed("intel-owns-the-world-12345"));
+    }
+    
+    #[test]
+    fn test_is_root() {
+        // Probably false unless you're running tests as root (you madman)
+        let _ = is_root();
+    }
 }
