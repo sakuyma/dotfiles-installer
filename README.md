@@ -79,7 +79,7 @@ dotfiles-installer
 
 - [ ] Rollback - For when things inevitably go wrong
 
-- [ ] Package install - Make it actually install all the things
+- [x] Package install - Make it actually install all the things
 
 - [ ] Logging - So you know what exploded and when
 
