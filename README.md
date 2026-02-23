@@ -46,23 +46,28 @@ dotfiles-installer
 
 ## Project structure
 .
-├── configs              
-│   ├── clone.rs       
-│   ├── install.rs     
-│   ├── laptop.rs      
-│   └── mod.rs         
-├── hardware           
-│   ├── amd.rs         
-│   ├── hardware.rs    
-│   ├── intel.rs       
-│   ├── mod.rs         
-│   ├── nvidia.rs      
-│   └── videocard.rs   
-├── main.rs            
-└── packages           
-    ├── install.rs     
-    ├── list.rs        
-    └── mod.rs         
+├── config                
+│   ├── mod.rs       
+│   ├── parser.rs    
+│   ├── settings.rs  
+│   └── structs.rs   
+├── dotfiles_manager 
+│   ├── clone.rs     
+│   ├── install.rs   
+│   ├── laptop.rs    
+│   └── mod.rs       
+├── hardware         
+│   ├── amd.rs       
+│   ├── intel.rs     
+│   ├── mod.rs       
+│   ├── nvidia.rs    
+│   ├── utils.rs     
+│   └── videocard.rs 
+├── main.rs          
+└── packages         
+    ├── install.rs   
+    ├── list.rs      
+    └── mod.rs       
 
 ## TODO
 
