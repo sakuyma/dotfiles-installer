@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotfiles_manager::install::stow_config()?;
 
     if hardware::utils::is_laptop() {
-        dotfiles::laptop::laptop_mode()?;
+        dotfiles_manager::laptop::laptop_mode()?;
     }
 
     hardware::videocard::setup_driver()?;
