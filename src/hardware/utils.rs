@@ -36,8 +36,10 @@ pub fn is_laptop() -> bool {
 
                 // Double-check that this is actually a Battery and not
                 // some other weird power supply device the system invented
-                if let Ok(typ) = fs::read_to_string(path) && typ.trim() == "Battery" {
-                        return true;
+                if let Ok(typ) = fs::read_to_string(path)
+                    && typ.trim() == "Battery"
+                {
+                    return true;
                 }
             }
         }

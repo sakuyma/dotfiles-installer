@@ -129,7 +129,6 @@ pub fn install_aur_packages(requested_groups: &[&str]) -> Result<(), String> {
     let cmd = format!("paru -S --noconfirm {}", pkg_list);
     let user = std::env::var("SUDO_USER").unwrap_or_else(|_| "nobody".to_string());
 
-
     let status = Command::new("sudo")
         .arg("-u")
         .arg(&user)

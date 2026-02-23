@@ -1,0 +1,32 @@
+[git]
+repo = "https://github.com/sakuyma/dotfiles"
+branch = "main"
+dotfiles_path = "~/.dotfiles"
+
+
+[packages]
+packages.base [
+    packages [
+        "base",
+        "base-devel",
+        "linux",
+        "linux-firmware",
+        "linux-headers",
+    ], 
+    dependencies [],
+]
+
+packages.rust [
+    packages [
+        "rustup",
+        "cargo",
+        "rust-analyzer",
+        "rustc",
+    ],
+    dependencies ["base"]
+
+]
+
+[laptop]
+enable_tlp = true
+enable_auto_cpufreq = true 

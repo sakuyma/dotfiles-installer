@@ -114,7 +114,8 @@ fn mkinitcpio() -> io::Result<bool> {
 
     // Parse each line like its 2000 and we're reading punch cards
     for line in content.lines() {
-        if line.trim_start().starts_with("MODULES=") && line.contains('(')
+        if line.trim_start().starts_with("MODULES=")
+            && line.contains('(')
             && let Some(start) = line.find('(')
             && let Some(end) = line.rfind(')')
         {

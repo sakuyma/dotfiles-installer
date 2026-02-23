@@ -109,7 +109,8 @@ fn mkinitcpio() -> io::Result<bool> {
 
     // Parse each line like it's 1995 and we're writing HTML by hand
     for line in content.lines() {
-        if line.trim_start().starts_with("MODULES=") && line.contains('(')
+        if line.trim_start().starts_with("MODULES=")
+            && line.contains('(')
             && let (Some(start), Some(end)) = (line.find('('), line.rfind(')'))
         {
             let before = &line[..start + 1];

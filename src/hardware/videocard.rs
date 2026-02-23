@@ -8,14 +8,15 @@ fn what_vendor() -> String {
         let output_str = String::from_utf8_lossy(&output.stdout);
         if output_str.to_lowercase().contains("nvidia") {
             return "Nvidia".to_string();
-        } else if output_str.to_lowercase().contains("amd") 
-            || output_str.to_lowercase().contains("radeon") {
+        } else if output_str.to_lowercase().contains("amd")
+            || output_str.to_lowercase().contains("radeon")
+        {
             return "Amd".to_string();
         } else if output_str.to_lowercase().contains("intel") {
             return "Intel".to_string();
         }
     }
-    
+
     // Fallback to gfxinfo
     match gfxinfo::active_gpu() {
         Ok(gpu) => {

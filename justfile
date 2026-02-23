@@ -239,6 +239,12 @@ info:
     rustc --version
     @echo ""
     @echo "Run 'just --list' to see all available commands"
+count:
+    @echo "Line count: "
+    @find src -name "*.rs" -exec wc -l {} + | tail -1
+    @echo ""
+    @echo "By module: "
+    @find src -name "*.rs" -exec wc -l {} + | sort -rn
 
 # Show help
 help:
