@@ -16,7 +16,7 @@ fn is_root() -> bool {
 // (pacman is usually grumpy but answers sometimes)
 fn check_package_installed(pkg: &str) -> bool {
     Command::new("pacman")
-        .args(&["-Q", pkg])
+        .args(vec!["-Q", pkg])
         .status()
         .map(|s| s.success())
         .unwrap_or(false)
