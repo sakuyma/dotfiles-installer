@@ -1,10 +1,23 @@
 use crate::hardware::{amd, intel, nvidia};
-use gfxinfo::active_gpu;
 
 // try to find out what gpu the user has
 // this is basically russian roullet
 fn what_vendor() -> String {
-    match active_gpu() {
+    // Try lspci first (more reliable)
+    if let Ok(output) = std::process::Command::new("lspci").output() {
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        if output_str.to_lowercase().contains("nvidia") {
+            return "Nvidia".to_string();
+        } else if output_str.to_lowercase().contains("amd") 
+            || output_str.to_lowercase().contains("radeon") {
+            return "Amd".to_string();
+        } else if output_str.to_lowercase().contains("intel") {
+            return "Intel".to_string();
+        }
+    }
+    
+    // Fallback to gfxinfo
+    match gfxinfo::active_gpu() {
         Ok(gpu) => {
             // We got answer
             gpu.vendor().to_string()

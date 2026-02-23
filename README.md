@@ -8,7 +8,7 @@ A Rust-powered tool to set up your Arch Linux system with dotfiles, drivers, and
 - Installs GPU drivers (AMD, Intel, NVIDIA - we don't discriminate)
 - Sets up packages from groups (base, dev, de, etc.)
 - Detects if you're on a laptop and acts accordingly
-- Has a 60% chance of working on the first try
+- Has a small chance of working on the first try
 
 ## Installation
 
