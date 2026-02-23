@@ -91,7 +91,7 @@ fn backup_config(path: &Path) -> io::Result<()> {
 }
 
 // Modify mkinitcpio.conf to include NVIDIA modules
-// Warning: contains regex-like string manipulation that definitely won't break
+// WARNING: contains regex-like string manipulation that definitely won't break
 fn mkinitcpio() -> io::Result<bool> {
     let config_path = Path::new(CONFIG_PATH);
     let new_modules = MODULES;
@@ -115,39 +115,38 @@ fn mkinitcpio() -> io::Result<bool> {
     let mut lines: Vec<String> = Vec::new();
     let mut modified = false;
 
-    // Parse each line like it's 1970 and we're reading punch cards
+    // Parse each line like its 2000 and we're reading punch cards
     for line in content.lines() {
-        if line.trim_start().starts_with("MODULES=") && line.contains('(') {
-            if let Some(start) = line.find('(') {
-                if let Some(end) = line.rfind(')') {
-                    let before = &line[..start + 1];
-                    let existing = &line[start + 1..end];
-                    let after = &line[end..];
+        if line.trim_start().starts_with("MODULES=") && line.contains('(') 
+            && let Some(start) = line.find('(')
+            && let Some(end) = line.rfind(')')  
+        {
+            let before = &line[..start + 1];
+            let existing = &line[start + 1..end];
+            let after = &line[end..];
 
-                    // Check if NVIDIA modules are already haunting this config
-                    let new_inside = if existing.trim().is_empty() {
-                        new_modules.to_string()
-                    } else if existing.contains("nvidia") {
-                        println!("NVIDIA modules already lurking in config");
-                        existing.to_string() // Don't touch what's not broken
-                    } else {
-                        format!("{} {}", existing, new_modules)
-                    };
+            // Check if NVIDIA modules are already haunting this config
+            let new_inside = if existing.trim().is_empty() {
+                new_modules.to_string()
+            } else if existing.contains("nvidia") {
+                println!("NVIDIA modules already lurking in config");
+                existing.to_string() // Don't touch what's not broken
+            } else {
+                format!("{} {}", existing, new_modules)
+            };
 
-                    // Did we actually change something?
-                    if new_inside != existing {
-                        let new_line = format!("{}{}{}", before, new_inside, after);
-                        lines.push(new_line);
-                        modified = true;
-                        println!("Injecting NVIDIA modules into MODULES line (science!)");
-                    } else {
-                        lines.push(line.to_string());
-                    }
-                    continue;
-                }
+            // Did we actually change something?
+            if new_inside != existing {
+                let new_line = format!("{}{}{}", before, new_inside, after);
+                lines.push(new_line);
+                modified = true;
+                println!("Injecting NVIDIA modules into MODULES line (science!)");
+            } else {
+                lines.push(line.to_string());
             }
+        } else {
+            lines.push(line.to_string());
         }
-        lines.push(line.to_string());
     }
 
     // Write changes if any (brave step)
