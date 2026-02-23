@@ -63,7 +63,7 @@ dotfiles-installer
 - Root priviges (because touching system files is fun)
 
 ## TODO
-- [x] Error handling - Actually handle errors instead of pretending they don't exist
+- [ ] Error handling - Actually handle errors instead of pretending they don't exist
 - [ ] User interaction - Ask questions instead of assuming things
 
 - [ ] CLI Arguments - So you don't have to edit the source code to change behavior
