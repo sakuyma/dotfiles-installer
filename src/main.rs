@@ -1,18 +1,18 @@
 #![allow(dead_code)]
 
-mod configs;
+mod dotfiles_manager;
 mod hardware;
 mod packages;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting installing");
 
-    configs::clone::clone_repo()?;
+    dotfiles_manager::clone::clone_repo()?;
 
-    configs::install::stow_config()?;
+    dotfiles_manager::install::stow_config()?;
 
     if hardware::utils::is_laptop() {
-        configs::laptop::laptop_mode()?;
+        dotfiles::laptop::laptop_mode()?;
     }
 
     hardware::videocard::setup_driver()?;
