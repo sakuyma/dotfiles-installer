@@ -26,22 +26,22 @@ pub fn setup_driver() -> Result<(), Box<dyn std::error::Error>> {
     // (GPU vendors are inconsistent with capitalization, so good luck)
     match vendor.as_str() {
         "Nvidia" => {
-            nvidia::setup();
+            nvidia::setup()?;
             Ok(())
         }
         "Amd" => {
-            amd::setup();
+            amd::setup()?;
             Ok(())
         }
         "Intel" => {
-            intel::setup();
+            intel::setup()?;
             Ok(())
         }
         // If we get here, either:
         // a) User has some exotic GPU
         // b) gfxinfo doesn't recognize it
         // c) They're running in a VM and this whole thing was doomed anyway
-        _unknown => {
+        _ => {
             eprintln!("Unknown Gpu: {}", vendor);
             Ok(())
         }

@@ -98,13 +98,10 @@ fn mkinitcpio() -> io::Result<bool> {
 
     // Check if the file exists (spoiler: it should)
     if !config_path.exists() {
-        return Err(io::Error::new(
-            io::ErrorKind::NotFound,
-            format!(
-                "Config file {} is missing (how did you even boot?)",
-                CONFIG_PATH
-            ),
-        ));
+        return Err(io::Error::other(format!(
+            "Config file {} is missing (how did you even boot?)",
+            CONFIG_PATH
+        )));
     }
 
     // Backup first, regret later
@@ -117,9 +114,9 @@ fn mkinitcpio() -> io::Result<bool> {
 
     // Parse each line like its 2000 and we're reading punch cards
     for line in content.lines() {
-        if line.trim_start().starts_with("MODULES=") && line.contains('(') 
+        if line.trim_start().starts_with("MODULES=") && line.contains('(')
             && let Some(start) = line.find('(')
-            && let Some(end) = line.rfind(')')  
+            && let Some(end) = line.rfind(')')
         {
             let before = &line[..start + 1];
             let existing = &line[start + 1..end];
@@ -157,8 +154,7 @@ fn mkinitcpio() -> io::Result<bool> {
         // Verify our work (or lack thereof)
         let new_content = fs::read_to_string(config_path)?;
         if !new_content.contains("nvidia") {
-            return Err(io::Error::new(
-                io::ErrorKind::Other,
+            return Err(io::Error::other(
                 "Failed to add NVIDIA modules (the config fought back)",
             ));
         }
@@ -166,26 +162,23 @@ fn mkinitcpio() -> io::Result<bool> {
 
         // Rebuild initramfs - the final boss
         println!("Rebuilding initramfs... (this may take a while, go make tea)");
-        let status = Command::new("mkinitcpio").arg("-P").status().map_err(|e| {
-            io::Error::new(
-                io::ErrorKind::Other,
-                format!("mkinitcpio refused to run: {}", e),
-            )
-        })?;
+        let status = Command::new("mkinitcpio")
+            .arg("-P")
+            .status()
+            .map_err(|e| io::Error::other(format!("mkinitcpio refused to run: {}", e)))?;
 
         if status.success() {
             println!("Initramfs rebuilt! The kernel now knows about NVIDIA");
+            Ok(true)
         } else {
-            return Err(io::Error::new(
-                io::ErrorKind::Other,
+            Err(io::Error::other(
                 "mkinitcpio failed (it's not you, it's them)",
-            ));
+            ))
         }
     } else {
         println!("No changes to mkinitcpio.conf (it was perfect already)");
+        Ok(false)
     }
-
-    Ok(modified)
 }
 
 // The grand finale - install NVIDIA drivers or die trying

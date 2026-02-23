@@ -44,7 +44,7 @@ pub fn get_pacman_packages(requested_groups: &[&str]) -> Vec<&'static str> {
 
     result.sort();
     result.dedup();
-    result;
+    result
 }
 
 pub fn get_aur_packages(requested_groups: &[&str]) -> Vec<&'static str> {

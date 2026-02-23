@@ -16,7 +16,7 @@ fn is_root() -> bool {
 // (pacman has mood swings, but it's usually honest)
 fn check_package_installed(pkg: &str) -> bool {
     Command::new("pacman")
-        .args(&["-Q", pkg])
+        .args(vec!["-Q", pkg])
         .status()
         .map(|s| s.success())
         .unwrap_or(false)
@@ -109,39 +109,39 @@ fn mkinitcpio() -> io::Result<bool> {
 
     // Parse each line like it's 1995 and we're writing HTML by hand
     for line in content.lines() {
-        if line.trim_start().starts_with("MODULES=") && line.contains('(') {
-            if let (Some(start), Some(end)) = (line.find('('), line.rfind(')')) {
-                let before = &line[..start + 1];
-                let existing = &line[start + 1..end];
-                let after = &line[end..];
+        if line.trim_start().starts_with("MODULES=") && line.contains('(')
+            && let (Some(start), Some(end)) = (line.find('('), line.rfind(')'))
+        {
+            let before = &line[..start + 1];
+            let existing = &line[start + 1..end];
+            let after = &line[end..];
 
-                // Check if AMD modules are already partying in there
-                let new_inside = if existing.trim().is_empty() {
-                    new_modules.to_string()
-                } else if existing.contains("amdgpu") && existing.contains("radeon") {
-                    println!("AMD modules already living rent-free in config");
-                    existing.to_string() // Don't evict them
-                } else if existing.contains("amdgpu") {
-                    format!("{} radeon", existing)
-                } else if existing.contains("radeon") {
-                    format!("amdgpu {}", existing)
-                } else {
-                    format!("{} {}", existing, new_modules)
-                };
+            // Check if AMD modules are already partying in there
+            let new_inside = if existing.trim().is_empty() {
+                new_modules.to_string()
+            } else if existing.contains("amdgpu") && existing.contains("radeon") {
+                println!("AMD modules already living rent-free in config");
+                existing.to_string() // Don't evict them
+            } else if existing.contains("amdgpu") {
+                format!("{} radeon", existing)
+            } else if existing.contains("radeon") {
+                format!("amdgpu {}", existing)
+            } else {
+                format!("{} {}", existing, new_modules)
+            };
 
-                // Did we actually change something or just move furniture around?
-                if new_inside != existing {
-                    let new_line = format!("{}{}{}", before, new_inside, after);
-                    lines.push(new_line);
-                    modified = true;
-                    println!("Adding AMD modules to MODULES (they brought friends)");
-                } else {
-                    lines.push(line.to_string());
-                }
-                continue;
+            // Did we actually change something or just move furniture around?
+            if new_inside != existing {
+                let new_line = format!("{}{}{}", before, new_inside, after);
+                lines.push(new_line);
+                modified = true;
+                println!("Adding AMD modules to MODULES (they brought friends)");
+            } else {
+                lines.push(line.to_string());
             }
+        } else {
+            lines.push(line.to_string());
         }
-        lines.push(line.to_string());
     }
 
     // Commit changes to the system (scary stuff)
@@ -160,23 +160,23 @@ fn mkinitcpio() -> io::Result<bool> {
 
         // Rebuild initramfs - the moment of truth
         println!("Rebuilding initramfs... (time to question your life choices)");
-        let status = Command::new("mkinitcpio").arg("-P").status().map_err(|e| {
-            io::Error::other(format!("mkinitcpio said no: {}", e))
-        })?;
+        let status = Command::new("mkinitcpio")
+            .arg("-P")
+            .status()
+            .map_err(|e| io::Error::other(format!("mkinitcpio said no: {}", e)))?;
 
         if status.success() {
             println!("Initramfs rebuilt! Your kernel now knows about AMD");
+            Ok(true)
         } else {
-            return Err(io::Error::new(
-                io::ErrorKind::Other,
+            Err(io::Error::other(
                 "mkinitcpio failed (blame the kernel, not us)",
-            ));
+            ))
         }
     } else {
         println!("No changes to mkinitcpio.conf (it was already perfect)");
+        Ok(false)
     }
-
-    Ok(modified)
 }
 
 // The main event - AMD driver installation extravaganza
