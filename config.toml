@@ -27,6 +27,75 @@ packages.rust [
 
 ]
 
+packages.aur [
+    packages [
+        "paru",
+        "yay",
+    ]
+    dependencies ["base", "rust"]
+]
+
+packages.de [
+    packages [
+        "hyprland",
+        "waybar",
+        "rofi",
+        "wlogout-bin",
+        "kitty",
+        "polkit-gnome",
+        "swaync",
+        "wl-clipboard",
+        "wl-clip-persist",
+        "hyprlock",
+        "hypridle",
+        "hyprsunset",
+    ]
+    dependencies ["aur", "base"]
+]
+
+packages.dev [
+    packages [
+        "neovim",
+        "vscodium-bin",
+        "yazi",
+        "7zip",
+        "jq",
+        "ffmpeg",
+        "poppler",
+        "fzf",
+        "resvg",
+        "imagemagick",
+        "ttf-jetbrains-mono-nerd",
+        "fd",
+        "rg",
+        "lsd",
+        "zoxide",
+        "zsh",
+        "starship",
+        "python",
+        "uv",
+        "nodejs",
+        "npm",
+        "go",
+        "gcc",
+        "jdk-opendjk",
+        "cmake",
+        "make",
+        "just",
+        "docker",
+        "docker-compose",
+        "tmux",
+        "btop",
+        "tldr",
+    ]
+    dependencies ["aur", "base"]
+]
+
+packages.all[
+    packages []
+    dependencies ["base", "rust", "aur", "de", "dev"]
+]
+
 [laptop]
 enable_tlp = true
 enable_auto_cpufreq = true 

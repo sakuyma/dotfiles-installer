@@ -1,131 +1,42 @@
+use crate::config::settings;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone)]
 pub struct PackageGroup {
-    pub name: &'static str,
-    pub packages: Vec<&'static str>,
-    pub dependencies: Vec<&'static str>, // dependencies for package groups
+    pub name: String,
+    pub packages: Vec<String>,
+    pub dependencies: Vec<String>,
 }
-pub fn get_all_groups() -> HashMap<&'static str, PackageGroup> {
+
+pub fn get_all_groups() -> HashMap<String, PackageGroup> {
     let mut groups = HashMap::new();
-
-    groups.insert(
-        "base",
-        PackageGroup {
-            name: "base",
-            packages: vec![
-                "base",
-                "base-devel",
-                "linux",
-                "linux-firmware",
-                "linux-headers",
-            ],
-            dependencies: vec![],
-        },
-    );
-
-    groups.insert(
-        "rust",
-        PackageGroup {
-            name: "rust",
-            packages: vec!["rustup", "cargo", "rust-analyzer", "rustc"],
-            dependencies: vec!["base"],
-        },
-    );
-    groups.insert(
-        "aur",
-        PackageGroup {
-            name: "aur",
-            packages: vec!["paru"],
-            dependencies: vec!["rust", "base"],
-        },
-    );
-
-    groups.insert(
-        "de",
-        PackageGroup {
-            name: "de",
-            packages: vec![
-                "hyprland",
-                "waybar",
-                "rofi",
-                "wlogout-bin",
-                "kitty",
-                "polkit-gnome",
-                "swaync",
-                "wl-clipboard",
-                "wl-clip-persist",
-                "hyprlock",
-                "hypridle",
-                "hyprsunset",
-            ],
-            dependencies: vec!["aur", "base"],
-        },
-    );
-
-    groups.insert(
-        "dev",
-        PackageGroup {
-            name: "dev",
-            packages: vec![
-                "neovim",
-                "vscodium-bin",
-                "yazi",
-                "7zip",
-                "jq",
-                "ffmpeg",
-                "poppler",
-                "fzf",
-                "resvg",
-                "imagemagick",
-                "ttf-jetbrains-mono-nerd",
-                "fd",
-                "rg",
-                "lsd",
-                "zoxide",
-                "zsh",
-                "starship",
-                "python",
-                "uv",
-                "nodejs",
-                "npm",
-                "go",
-                "gcc",
-                "jdk-opendjk",
-                "cmake",
-                "make",
-                "just",
-                "docker",
-                "docker-compose",
-                "tmux",
-                "btop",
-                "tldr",
-            ],
-            dependencies: vec!["aur", "base"],
-        },
-    );
-    groups.insert(
-        "all",
-        PackageGroup {
-            name: "all",
-            packages: vec![],
-            dependencies: vec!["base", "rust", "aur", "de", "dev"],
-        },
-    );
+    let config_groups = settings::package_groups();
+    
+    for (name, group) in config_groups {
+        groups.insert(
+            name.clone(),
+            PackageGroup {
+                name: name.clone(),
+                packages: group.packages.clone(),
+                dependencies: group.dependencies.clone(),
+            }
+        );
+    }
+    
     groups
 }
 
-pub fn get_installation_order(requested_groups: &[&str]) -> Vec<Vec<&'static str>> {
+pub fn get_installation_order(requested_groups: &[String]) -> Vec<Vec<String>> {
     let groups = get_all_groups();
     let mut result = Vec::new();
     let mut installed_groups = HashSet::new();
-    let mut remaining: Vec<&str> = requested_groups.to_vec();
+    let mut remaining = requested_groups.to_vec();
 
     while !remaining.is_empty() {
         let mut current_round = Vec::new();
         let mut still_remaining = Vec::new();
 
-        for &group_name in &remaining {
+        for group_name in &remaining {
             if let Some(group) = groups.get(group_name) {
                 // Check if all dependencies are satisfied
                 // (like a startup chain but for packages)
@@ -136,9 +47,9 @@ pub fn get_installation_order(requested_groups: &[&str]) -> Vec<Vec<&'static str
 
                 if deps_installed {
                     current_round.extend(group.packages.clone());
-                    installed_groups.insert(group_name);
+                    installed_groups.insert(group_name.clone());
                 } else {
-                    still_remaining.push(group_name);
+                    still_remaining.push(group_name.clone());
                 }
             }
         }
@@ -165,31 +76,31 @@ pub fn get_installation_order(requested_groups: &[&str]) -> Vec<Vec<&'static str
 }
 
 // get package list based on their order
-pub fn get_packages_with_order(requested_groups: &[&str]) -> Vec<&'static str> {
+pub fn get_packages_with_order(requested_groups: &[String]) -> Vec<String> {
     let order = get_installation_order(requested_groups);
     order.into_iter().flatten().collect()
 }
 // This dependency resolver is held together by god and regex
 // DO NOT TOUCH unless you enjoy untangling circular dependencies
-pub fn check_dependencies(group_name: &str) -> Vec<&'static str> {
+pub fn check_dependencies(group_name: &str) -> Vec<String> {
     let groups = get_all_groups();
     let mut deps = Vec::new();
-    let mut to_check = vec![group_name];
+    let mut to_check = vec![group_name.to_string()];
     let mut checked = HashSet::new();
 
     while let Some(current) = to_check.pop() {
-        if checked.contains(current) {
+        if checked.contains(&current) {
             continue;
         }
 
-        if let Some(group) = groups.get(current) {
+        if let Some(group) = groups.get(&current) {
             deps.extend(group.packages.clone());
-            checked.insert(current);
+            checked.insert(current.clone());
 
             // Add dependencies for check
-            for &dep in &group.dependencies {
+            for dep in &group.dependencies {
                 if !checked.contains(dep) {
-                    to_check.push(dep);
+                    to_check.push(dep.clone());
                 }
             }
         }

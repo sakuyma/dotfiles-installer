@@ -4,7 +4,7 @@ use std::process::Command;
 
 fn is_aur_group(
     group_name: &str,
-    groups: &HashMap<&'static str, list::PackageGroup>,
+    groups: &HashMap<String, list::PackageGroup>,
     checked: &mut HashSet<String>,
 ) -> bool {
     if checked.contains(group_name) {
@@ -17,7 +17,7 @@ fn is_aur_group(
             return true;
         }
 
-        for &dep in &group.dependencies {
+        for dep in &group.dependencies {
             if is_aur_group(dep, groups, checked) {
                 return true;
             }
@@ -27,12 +27,12 @@ fn is_aur_group(
     false
 }
 
-pub fn get_pacman_packages(requested_groups: &[&str]) -> Vec<&'static str> {
+pub fn get_pacman_packages(requested_groups: &[String]) -> Vec<String> {
     let groups = list::get_all_groups();
     let mut result = Vec::new();
     let mut processed = HashSet::new();
 
-    for &group_name in requested_groups {
+    for group_name in requested_groups {
         collect_packages_by_type(
             group_name,
             &groups,
@@ -47,12 +47,12 @@ pub fn get_pacman_packages(requested_groups: &[&str]) -> Vec<&'static str> {
     result
 }
 
-pub fn get_aur_packages(requested_groups: &[&str]) -> Vec<&'static str> {
+pub fn get_aur_packages(requested_groups: &[String]) -> Vec<String> {
     let groups = list::get_all_groups();
     let mut result = Vec::new();
     let mut processed = HashSet::new();
 
-    for &group_name in requested_groups {
+    for group_name in requested_groups {
         collect_packages_by_type(
             group_name,
             &groups,
@@ -69,8 +69,8 @@ pub fn get_aur_packages(requested_groups: &[&str]) -> Vec<&'static str> {
 
 fn collect_packages_by_type(
     group_name: &str,
-    groups: &HashMap<&'static str, list::PackageGroup>,
-    result: &mut Vec<&'static str>,
+    groups: &HashMap<String, list::PackageGroup>,
+    result: &mut Vec<String>,
     processed: &mut HashSet<String>,
     want_aur: bool, // true -  AUR, false - not AUR
 ) {
@@ -82,7 +82,7 @@ fn collect_packages_by_type(
         let mut checked = HashSet::new();
         let is_aur = is_aur_group(group_name, groups, &mut checked);
 
-        for &dep in &group.dependencies {
+        for dep in &group.dependencies {
             collect_packages_by_type(dep, groups, result, processed, want_aur);
         }
 
@@ -95,7 +95,7 @@ fn collect_packages_by_type(
     }
 }
 
-pub fn install_pacman_packages(requested_groups: &[&str]) -> Result<(), String> {
+pub fn install_pacman_packages(requested_groups: &[String]) -> Result<(), String> {
     let packages = get_pacman_packages(requested_groups);
 
     if packages.is_empty() {
@@ -118,7 +118,7 @@ pub fn install_pacman_packages(requested_groups: &[&str]) -> Result<(), String> 
     }
 }
 
-pub fn install_aur_packages(requested_groups: &[&str]) -> Result<(), String> {
+pub fn install_aur_packages(requested_groups: &[String]) -> Result<(), String> {
     let packages = get_aur_packages(requested_groups);
 
     if packages.is_empty() {
@@ -132,6 +132,8 @@ pub fn install_aur_packages(requested_groups: &[&str]) -> Result<(), String> {
     let status = Command::new("sudo")
         .arg("-u")
         .arg(&user)
+        .arg("sh")
+        .arg("-c")
         .arg(&cmd)
         .status()
         .map_err(|e| format!("Error running: {}", e))?;
@@ -144,7 +146,7 @@ pub fn install_aur_packages(requested_groups: &[&str]) -> Result<(), String> {
     }
 }
 
-pub fn install_all(requested_groups: &[&str]) -> Result<(), String> {
+pub fn install_all(requested_groups: &[String]) -> Result<(), String> {
     install_pacman_packages(requested_groups)?;
     install_aur_packages(requested_groups)?;
 

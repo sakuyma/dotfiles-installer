@@ -25,13 +25,6 @@ pub static GIT_CONFIG: OnceLock<GitSettings> = OnceLock::new();
 pub static PACKAGE_GROUPS: OnceLock<HashMap<String, PackageGroup>> = OnceLock::new();
 pub static LAPTOP_CONFIG: OnceLock<LaptopSettings> = OnceLock::new();
 
-// Re-export structs so they can be used directly
-pub use self::{
-    GitSettings,
-    PackageGroup,
-    LaptopSettings,
-};
-
 // Accessor functions
 pub fn git() -> &'static GitSettings {
     GIT_CONFIG.get().expect("Git config not initialized")

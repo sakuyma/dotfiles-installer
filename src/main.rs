@@ -1,11 +1,13 @@
 #![allow(dead_code)]
 
+mod config;
 mod dotfiles_manager;
 mod hardware;
 mod packages;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Starting installing");
+    config::init();
 
     dotfiles_manager::clone::clone_repo()?;
 
@@ -17,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     hardware::videocard::setup_driver()?;
 
-    let groups = vec!["all"];
+    let groups = vec!["all".to_string()];
     packages::install::install_all(&groups)?;
 
     Ok(())
