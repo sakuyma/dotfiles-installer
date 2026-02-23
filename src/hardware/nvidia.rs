@@ -26,37 +26,40 @@ fn check_package_installed(pkg: &str) -> bool {
 // May cause: eye candy, heating issues, or existential dread
 fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     println!("Checking NVIDIA drivers... (please don't explode)");
-    
+
     // The sacred list of NVIDIA packages
     // (may or may not actually work with your GPU)
     let packages = [
         "nvidia-open",
-        "nvidia-utils", 
+        "nvidia-utils",
         "lib32-nvidia-utils",
         "egl-wayland",
     ];
-    
+
     // Check what's already there (probably nothing if you're on Intel)
     let mut all_installed = true;
     let mut missing_packages = Vec::new();
-    
+
     for &pkg in &packages {
         if !check_package_installed(pkg) {
             all_installed = false;
             missing_packages.push(pkg);
         }
     }
-    
+
     if all_installed {
         println!("NVIDIA drivers already installed (someone beat us to it)");
         return Ok(true);
     }
-    
-    println!("Installing NVIDIA drivers: {:?} (fingers crossed)", missing_packages);
-    
+
+    println!(
+        "Installing NVIDIA drivers: {:?} (fingers crossed)",
+        missing_packages
+    );
+
     // Summon the pacman demon
     let status = Command::new("pacman")
-        .args(&[
+        .args(vec![
             "-S",
             "--noconfirm",
             "--needed",
@@ -66,7 +69,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
             "egl-wayland",
         ])
         .status()?;
-    
+
     if status.success() {
         println!("NVIDIA drivers installed! Your GPU may now demand more fans");
         Ok(true)
@@ -92,23 +95,26 @@ fn backup_config(path: &Path) -> io::Result<()> {
 fn mkinitcpio() -> io::Result<bool> {
     let config_path = Path::new(CONFIG_PATH);
     let new_modules = MODULES;
-    
+
     // Check if the file exists (spoiler: it should)
     if !config_path.exists() {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
-            format!("Config file {} is missing (how did you even boot?)", CONFIG_PATH)
+            format!(
+                "Config file {} is missing (how did you even boot?)",
+                CONFIG_PATH
+            ),
         ));
     }
-    
+
     // Backup first, regret later
     backup_config(config_path)?;
-    
+
     // Read the ancient text
     let content = fs::read_to_string(config_path)?;
     let mut lines: Vec<String> = Vec::new();
     let mut modified = false;
-    
+
     // Parse each line like it's 1970 and we're reading punch cards
     for line in content.lines() {
         if line.trim_start().starts_with("MODULES=") && line.contains('(') {
@@ -117,7 +123,7 @@ fn mkinitcpio() -> io::Result<bool> {
                     let before = &line[..start + 1];
                     let existing = &line[start + 1..end];
                     let after = &line[end..];
-                    
+
                     // Check if NVIDIA modules are already haunting this config
                     let new_inside = if existing.trim().is_empty() {
                         new_modules.to_string()
@@ -127,7 +133,7 @@ fn mkinitcpio() -> io::Result<bool> {
                     } else {
                         format!("{} {}", existing, new_modules)
                     };
-                    
+
                     // Did we actually change something?
                     if new_inside != existing {
                         let new_line = format!("{}{}{}", before, new_inside, after);
@@ -143,78 +149,79 @@ fn mkinitcpio() -> io::Result<bool> {
         }
         lines.push(line.to_string());
     }
-    
+
     // Write changes if any (brave step)
     if modified {
         fs::write(config_path, lines.join("\n"))?;
         println!("mkinitcpio.conf has been... modified");
-        
+
         // Verify our work (or lack thereof)
         let new_content = fs::read_to_string(config_path)?;
         if !new_content.contains("nvidia") {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
-                "Failed to add NVIDIA modules (the config fought back)"
+                "Failed to add NVIDIA modules (the config fought back)",
             ));
         }
         println!("Verified modules are now in the matrix");
-        
+
         // Rebuild initramfs - the final boss
         println!("Rebuilding initramfs... (this may take a while, go make tea)");
-        let status = Command::new("mkinitcpio")
-            .arg("-P")
-            .status()
-            .map_err(|e| io::Error::new(
-                io::ErrorKind::Other, 
-                format!("mkinitcpio refused to run: {}", e)
-            ))?;
-        
+        let status = Command::new("mkinitcpio").arg("-P").status().map_err(|e| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                format!("mkinitcpio refused to run: {}", e),
+            )
+        })?;
+
         if status.success() {
             println!("Initramfs rebuilt! The kernel now knows about NVIDIA");
         } else {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
-                "mkinitcpio failed (it's not you, it's them)"
+                "mkinitcpio failed (it's not you, it's them)",
             ));
         }
     } else {
         println!("No changes to mkinitcpio.conf (it was perfect already)");
     }
-    
+
     Ok(modified)
 }
 
 // The grand finale - install NVIDIA drivers or die trying
 pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
     println!("Attempting to tame the NVIDIA dragon...");
-    
+
     // Root check - because system files are like "no touchy" for regular users
     if !is_root() {
         return Err("You need root powers. Try again with sudo (like a boss)".into());
     }
-    
+
     // Install the drivers (prayer circle recommended)
     install_drivers()?;
-    
+
     // Configure the system (black magic happens here)
     mkinitcpio()?;
-    
+
     println!("\nNVIDIA setup complete! Your GPU is now (probably) working");
     println!("Reboot when you're ready to see if we broke anything");
-    
+
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_check_package_installed() {
         // This should return false because nobody installs this
-        assert!(!check_package_installed("definitely-not-a-real-package-12345"));
+        assert!(!check_package_installed(
+            "definitely-not-a-real-package-12345"
+        ));
     }
-    
+
     #[test]
     fn test_is_root() {
         // Test runs as user, so should be false (unless you're running tests as root, you madman)

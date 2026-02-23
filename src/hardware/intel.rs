@@ -50,7 +50,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     
     // Call pacman (the friendly neighborhood package manager)
     let status = Command::new("pacman")
-        .args(&[
+        .args(vec![
             "-S",
             "--noconfirm",
             "--needed",
