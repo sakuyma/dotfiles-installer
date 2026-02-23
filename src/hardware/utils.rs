@@ -7,11 +7,11 @@ use std::fs;
 pub fn get_architecture() -> bool {
     let arch = env::consts::ARCH.to_string();
     if arch == "x86_64" {
-        return true;
+        true
     } else {
         eprintln!("ARM detected - I have no idea what you're doing here");
         eprintln!("(seriously, ARM support is not a thing... yet)");
-        return false;
+        false
     }
 }
 
@@ -46,7 +46,7 @@ pub fn is_laptop() -> bool {
     }
     // No battery found - either a desktop or a VM
     // (or the system is using some weird non-standard power setup)
-    return false;
+    false
 }
 
 #[cfg(test)]
