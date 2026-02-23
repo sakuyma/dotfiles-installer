@@ -1,5 +1,5 @@
 mod amd;
-pub mod hardware;
+pub mod utils;
 mod intel;
 mod nvidia;
 pub mod videocard;
