@@ -1,6 +1,6 @@
-mod structs;
 mod parser;
 pub mod settings;
+mod structs;
 
 // Re-export commonly used items
 pub use parser::ConfigParser;

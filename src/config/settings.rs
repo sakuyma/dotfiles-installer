@@ -31,7 +31,9 @@ pub fn git() -> &'static GitSettings {
 }
 
 pub fn package_groups() -> &'static HashMap<String, PackageGroup> {
-    PACKAGE_GROUPS.get().expect("Package groups not initialized")
+    PACKAGE_GROUPS
+        .get()
+        .expect("Package groups not initialized")
 }
 
 pub fn package_group(name: &str) -> Option<&'static PackageGroup> {
@@ -65,13 +67,13 @@ pub fn is_auto_cpufreq_enabled() -> bool {
 pub fn get_packages_for_groups(group_names: &[String]) -> Vec<String> {
     let mut packages = Vec::new();
     let groups = package_groups();
-    
+
     for name in group_names {
         if let Some(group) = groups.get(name) {
             packages.extend(group.packages.clone());
         }
     }
-    
+
     packages.sort();
     packages.dedup();
     packages

@@ -81,21 +81,23 @@ impl ConfigParser {
         Ok(config)
     }
 
-
     pub fn validate(&self, config: &Config) -> Vec<String> {
-    let mut errors = Vec::new();
+        let mut errors = Vec::new();
 
-    if let Some(git) = &config.git 
-        && let Some(repo) = &git.repo && !repo.starts_with("http") && !repo.starts_with("git@") {
+        if let Some(git) = &config.git
+            && let Some(repo) = &git.repo
+            && !repo.starts_with("http")
+            && !repo.starts_with("git@")
+        {
             errors.push(format!("Invalid repository format: {}", repo));
         }
 
-    if let Some(packages) = &config.packages {
-        self.check_circular_dependencies(&packages.groups, &mut errors);
-    }
+        if let Some(packages) = &config.packages {
+            self.check_circular_dependencies(&packages.groups, &mut errors);
+        }
 
-    errors
-}
+        errors
+    }
     fn check_circular_dependencies(
         &self,
         groups: &HashMap<String, super::structs::PackageGroup>,

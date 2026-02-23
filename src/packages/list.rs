@@ -11,7 +11,7 @@ pub struct PackageGroup {
 pub fn get_all_groups() -> HashMap<String, PackageGroup> {
     let mut groups = HashMap::new();
     let config_groups = settings::package_groups();
-    
+
     for (name, group) in config_groups {
         groups.insert(
             name.clone(),
@@ -19,10 +19,10 @@ pub fn get_all_groups() -> HashMap<String, PackageGroup> {
                 name: name.clone(),
                 packages: group.packages.clone(),
                 dependencies: group.dependencies.clone(),
-            }
+            },
         );
     }
-    
+
     groups
 }
 

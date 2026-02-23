@@ -1,6 +1,6 @@
 use crate::config::settings;
 use std::env;
-use std::fs::{self, read_to_string, OpenOptions};
+use std::fs::{self, OpenOptions, read_to_string};
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;

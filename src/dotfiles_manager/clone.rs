@@ -102,10 +102,11 @@ pub fn clone_repo_with_depth() -> Result<(), Box<dyn std::error::Error>> {
         Ok(repo) => {
             println!("Repository cloned successfully");
 
-            if let Ok(head) = repo.head() 
-                && let Some(name) = head.shorthand() {
-                    println!("Current branch: {}", name);
-                }
+            if let Ok(head) = repo.head()
+                && let Some(name) = head.shorthand()
+            {
+                println!("Current branch: {}", name);
+            }
 
             Ok(())
         }
