@@ -22,12 +22,22 @@ jobs:
         sudo apt-get install -y \
           libdrm-dev \
           libdrm-amdgpu1 \
-          libdrm-amdgpu-dev \
+          libdrm-radeon1 \
+          libdrm-intel1 \
+          libdrm-nouveau2 \
           libssl-dev \
           pkg-config \
           libgit2-dev \
           libssh2-1-dev \
-          zlib1g-dev
+          zlib1g-dev \
+          libx11-dev \
+          libxcursor-dev \
+          libxrandr-dev \
+          libxi-dev \
+          libxinerama-dev \
+          libwayland-dev \
+          libxkbcommon-dev
+
     
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
@@ -49,7 +59,7 @@ jobs:
     
     - name: Run clippy
       run: cargo clippy -- -D warnings
-      continue-on-error: true 
+      continue-on-error: true
     
     - name: Build
       run: cargo build --verbose --release
