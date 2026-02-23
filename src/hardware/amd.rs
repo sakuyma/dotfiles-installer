@@ -16,7 +16,7 @@ fn is_root() -> bool {
 // (pacman has mood swings, but it's usually honest)
 fn check_package_installed(pkg: &str) -> bool {
     Command::new("pacman")
-        .args(vec!["-Q", pkg])
+        .args(&["-Q", pkg])
         .status()
         .map(|s| s.success())
         .unwrap_or(false)
@@ -152,8 +152,7 @@ fn mkinitcpio() -> io::Result<bool> {
         // Double-check our work like a paranoid sysadmin
         let new_content = fs::read_to_string(config_path)?;
         if !new_content.contains("amdgpu") || !new_content.contains("radeon") {
-            return Err(io::Error::new(
-                io::ErrorKind::Other,
+            return Err(io::Error::other(
                 "Failed to add AMD modules (the config is being stubborn)",
             ));
         }
@@ -162,7 +161,7 @@ fn mkinitcpio() -> io::Result<bool> {
         // Rebuild initramfs - the moment of truth
         println!("Rebuilding initramfs... (time to question your life choices)");
         let status = Command::new("mkinitcpio").arg("-P").status().map_err(|e| {
-            io::Error::new(io::ErrorKind::Other, format!("mkinitcpio said no: {}", e))
+            io::Error::other(format!("mkinitcpio said no: {}", e))
         })?;
 
         if status.success() {
