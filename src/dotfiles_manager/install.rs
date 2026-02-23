@@ -1,10 +1,11 @@
+use crate::config::settings;
 use std::env;
 use std::path::Path;
 use std::process::Command;
 
 pub fn stow_config() -> Result<(), String> {
     let home = env::var("HOME").map_err(|e| format!("HOME not found: {}", e))?;
-    let stow_dir = Path::new(&home).join(".dotfiles/config");
+    let stow_dir = settings::dotfiles_path(); 
     let target_dir = Path::new(&home);
 
     if !stow_dir.exists() {
