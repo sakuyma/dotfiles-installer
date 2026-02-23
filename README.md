@@ -79,7 +79,7 @@ dotfiles-installer
 
 - [ ] Config profiles - Different setups for different moods
 
-- [ ] Config file - So you don't have to edit the source code
+- [x] Config file - So you don't have to edit the source code
 
 - [ ] Rollback - For when things inevitably go wrong
 
