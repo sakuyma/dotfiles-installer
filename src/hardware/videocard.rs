@@ -13,7 +13,7 @@ fn what_vendor() -> String {
             // could be integrated graphics,
             // could be the user running this in vm
             // could be system just being wierd
-            return String::from("Unknown vendor");
+            String::from("Unknown vendor")
         }
     }
 }

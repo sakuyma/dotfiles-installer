@@ -112,7 +112,7 @@ pub fn get_all_groups() -> HashMap<&'static str, PackageGroup> {
             dependencies: vec!["base", "rust", "aur", "de", "dev"],
         },
     );
-    return groups;
+    groups
 }
 
 pub fn get_installation_order(requested_groups: &[&str]) -> Vec<Vec<&'static str>> {
@@ -161,7 +161,7 @@ pub fn get_installation_order(requested_groups: &[&str]) -> Vec<Vec<&'static str
         remaining = still_remaining;
     }
 
-    return result;
+    result
 }
 
 // get package list based on their order
@@ -197,7 +197,7 @@ pub fn check_dependencies(group_name: &str) -> Vec<&'static str> {
 
     deps.sort();
     deps.dedup();
-    return deps;
+    deps
 }
 
 // Holy shitcode
