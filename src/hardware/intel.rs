@@ -17,6 +17,6 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
 }
 
 pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
-    install_drivers();
+    let _ = install_drivers();
     Ok(())
 }

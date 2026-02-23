@@ -13,7 +13,7 @@ fn what_vendor() -> String {
             // could be integrated graphics,
             // could be the user running this in vm
             // could be system just being wierd
-            return String::from("Unknown vendor");
+            String::from("Unknown vendor")
         }
     }
 }
@@ -26,15 +26,15 @@ pub fn setup_driver() -> Result<(), Box<dyn std::error::Error>> {
     // (GPU vendors are inconsistent with capitalization, so good luck)
     match vendor.as_str() {
         "Nvidia" => {
-            nvidia::setup();
+            let _ = nvidia::setup();
             Ok(())
         }
         "Amd" => {
-            amd::setup();
+            let _ = amd::setup();
             Ok(())
         }
         "Intel" => {
-            intel::setup();
+            let _ = intel::setup();
             Ok(())
         }
         // If we get here, either:
