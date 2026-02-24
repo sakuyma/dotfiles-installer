@@ -1,3 +1,14 @@
+mod args;
+pub mod commands;
+mod formatter;
+mod handlers;
+mod validator;
+
+pub use args::*;
+pub use formatter::*;
+pub use handlers::{handle_subcommand, resolve_config_path};
+pub use validator::validate_args;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
@@ -39,13 +50,13 @@ pub struct Args {
 pub enum Commands {
     /// List available package groups
     List(ListArgs),
-    
+
     /// Install specific packages without groups
     Install(InstallArgs),
-    
+
     /// Remove packages
     Remove(RemoveArgs),
-    
+
     /// Create example config file
     Init(InitArgs),
 }
@@ -82,27 +93,4 @@ pub struct InitArgs {
     /// Path to create config file
     #[arg(default_value = "config.example.toml")]
     pub path: String,
-}
-
-fn print_installation_plan(args: &Args) {
-    println!("\nInstallation plan:");
-    
-    if !args.skip_packages {
-        let groups = if args.groups.is_empty() {
-            "all groups".to_string()
-        } else {
-            format!("groups: {:?}", args.groups)
-        };
-        println!("Packages: {}", groups);
-    }
-    
-    if !args.skip_dotfiles {
-        println!("Dotfiles: will be cloned and stowed");
-    }
-    
-    if !args.skip_hardware {
-        println!("Hardware: GPU detection");
-    }
-    
-    println!();
 }
