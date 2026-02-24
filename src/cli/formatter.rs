@@ -1,25 +1,19 @@
-// Colors
-const GREEN: &str = "\x1b[32m";
-const RED: &str = "\x1b[31m";
-const YELLOW: &str = "\x1b[33m";
-const BLUE: &str = "\x1b[34m";
-const CYAN: &str = "\x1b[36m";
-const RESET: &str = "\x1b[0m";
+use colored::*;
 
 pub fn print_success(msg: &str) {
-    println!("{} {}{}", GREEN, msg, RESET);
+    println!("{}", msg.green());
 }
 
 pub fn print_error(msg: &str) {
-    eprintln!("{} {}{}", RED, msg, RESET);
+    eprintln!("{}", msg.red());
 }
 
 pub fn print_warning(msg: &str) {
-    println!("{} {}{}", YELLOW, msg, RESET);
+    println!("{}", msg.yellow());
 }
 
 pub fn print_progress(msg: &str) {
-    println!("{} {}{}", CYAN, msg, RESET);
+    println!("{}", msg.cyan());
 }
 
 pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
@@ -37,25 +31,54 @@ pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
         }
     }
     
-    // Print headers
+    // Print headers (bold and cyan)
     println!();
     for (i, header) in headers.iter().enumerate() {
-        print!("{:<width$} ", header, width = col_widths[i]);
+        print!("{} ", header.bold().cyan());
+        print!("{}", " ".repeat(col_widths[i] - header.len()));
     }
     println!();
     
-    // Print separator
+    // Print separator (gray)
     for &width in &col_widths {
-        print!("{:-<width$} ", "");
+        print!("{} ", "-".repeat(width).dimmed());
     }
     println!();
     
     // Print rows
     for row in rows {
         for (i, cell) in row.iter().enumerate() {
-            print!("{:<width$} ", cell, width = col_widths[i]);
+            if i == 0 {
+                print!("{} ", cell.bright_white());
+            } else {
+                print!("{} ", cell.white());
+            }
+            print!("{}", " ".repeat(col_widths[i] - cell.len()));
         }
         println!();
     }
     println!();
+}
+
+pub fn print_info(msg: &str) {
+    println!("{}", msg.blue());
+}
+
+pub fn print_debug(msg: &str) {
+    if cfg!(debug_assertions) {
+        println!("{}", msg.bright_magenta());
+    }
+}
+
+pub fn print_key_value(key: &str, value: &str) {
+    println!("  {}: {}", key.cyan(), value.white());
+}
+
+pub fn print_check(label: &str, success: bool) {
+    let mark = if success { 
+        "✓".green() 
+    } else { 
+        "✗".red() 
+    };
+    println!("  {} {}", mark, label);
 }

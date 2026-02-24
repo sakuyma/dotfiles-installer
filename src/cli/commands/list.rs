@@ -1,3 +1,4 @@
+use crate::cli::formatter::*;
 use super::super::{print_table, print_error};
 use crate::config;
 use clap::Args;
