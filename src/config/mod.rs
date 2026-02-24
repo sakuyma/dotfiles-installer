@@ -5,8 +5,8 @@ pub mod settings;
 pub mod structs;
 
 // Re-export commonly used items
-pub use structs::Config;
 pub use parser::ConfigParser;
+pub use structs::Config;
 
 pub fn init() {
     let parser = ConfigParser::new();
@@ -15,7 +15,7 @@ pub fn init() {
 
 pub fn init_with_path(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     let parser = ConfigParser::new();
-    
+
     // Expand ~ if needed
     let path = if path.starts_with("~/") {
         let home = std::env::var("HOME")?;
@@ -23,7 +23,7 @@ pub fn init_with_path(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     } else {
         path.to_string()
     };
-    
+
     if Path::new(&path).exists() {
         parser.load_and_apply(&path)?;
     } else {
@@ -32,6 +32,6 @@ pub fn init_with_path(path: &str) -> Result<(), Box<dyn std::error::Error>> {
         let empty_config = Config::default();
         parser.apply_config(empty_config);
     }
-    
+
     Ok(())
 }

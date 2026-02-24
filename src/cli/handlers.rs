@@ -1,5 +1,5 @@
 use super::args::{Args, Commands};
-use super::commands::{list, install, remove, init};
+use super::commands::{init, install, list, remove};
 use std::env;
 
 pub fn handle_subcommand(cmd: Commands) -> Result<(), Box<dyn std::error::Error>> {
@@ -12,10 +12,11 @@ pub fn handle_subcommand(cmd: Commands) -> Result<(), Box<dyn std::error::Error>
 }
 
 pub fn resolve_config_path(args: &Args) -> Result<String, Box<dyn std::error::Error>> {
-    let path = args.config
+    let path = args
+        .config
         .as_deref()
         .unwrap_or("~/.config/dotfiles-installer/config.toml");
-    
+
     if path.starts_with("~/") {
         let home = env::var("HOME")?;
         Ok(path.replacen("~", &home, 1))

@@ -1,8 +1,8 @@
 mod args;
-mod validator;
-mod formatter;
 pub mod commands;
+mod formatter;
 mod handlers;
+mod validator;
 
 // Re-export everything needed
 pub use args::Args;

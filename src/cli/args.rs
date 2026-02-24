@@ -1,5 +1,5 @@
-use clap::{Parser, Subcommand};
 use super::commands;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Dotfiles installer for Arch Linux", long_about = None)]
@@ -44,13 +44,13 @@ pub struct Args {
 pub enum Commands {
     /// List available package groups
     List(commands::list::ListArgs),
-    
+
     /// Install specific packages without groups
     Install(commands::install::InstallArgs),
-    
+
     /// Remove packages
     Remove(commands::remove::RemoveArgs),
-    
+
     /// Create example config file
     Init(commands::init::InitArgs),
 }

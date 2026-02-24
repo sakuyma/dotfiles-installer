@@ -20,7 +20,7 @@ pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
     if rows.is_empty() {
         return;
     }
-    
+
     // Calculate column widths
     let mut col_widths: Vec<usize> = headers.iter().map(|h| h.len()).collect();
     for row in rows {
@@ -30,7 +30,7 @@ pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
             }
         }
     }
-    
+
     // Print headers (bold and cyan)
     println!();
     for (i, header) in headers.iter().enumerate() {
@@ -38,13 +38,13 @@ pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
         print!("{}", " ".repeat(col_widths[i] - header.len()));
     }
     println!();
-    
+
     // Print separator (gray)
     for &width in &col_widths {
         print!("{} ", "-".repeat(width).dimmed());
     }
     println!();
-    
+
     // Print rows
     for row in rows {
         for (i, cell) in row.iter().enumerate() {
@@ -75,10 +75,6 @@ pub fn print_key_value(key: &str, value: &str) {
 }
 
 pub fn print_check(label: &str, success: bool) {
-    let mark = if success { 
-        "✓".green() 
-    } else { 
-        "✗".red() 
-    };
+    let mark = if success { "✓".green() } else { "✗".red() };
     println!("  {} {}", mark, label);
 }
