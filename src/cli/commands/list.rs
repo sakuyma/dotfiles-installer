@@ -50,7 +50,6 @@ pub fn execute(args: ListArgs) -> Result<(), Box<dyn std::error::Error>> {
         ]);
     }
     
-    // Print table - исправленная строка
     println!();
     println!("{:<15} {:<10} Dependencies", "Group", "Packages");
     println!("{:-<15} {:-<10} {:-<20}", "", "", "");
