@@ -11,7 +11,7 @@ use cli::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = cli::parse();
-    
+
     // Initialize logging based on --log flag
     logging::init(args.log);
 

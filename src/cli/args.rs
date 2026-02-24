@@ -39,7 +39,6 @@ pub struct Args {
     #[arg(long)]
     pub log: bool,
 
-
     #[command(subcommand)]
     pub command: Option<Commands>,
 }

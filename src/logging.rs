@@ -1,5 +1,5 @@
-use log::LevelFilter;
 use chrono::Local;
+use log::LevelFilter;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 static LOG_ENABLED: AtomicBool = AtomicBool::new(false);
@@ -9,14 +9,14 @@ pub fn init(log_enabled: bool) {
         LOG_ENABLED.store(false, Ordering::SeqCst);
         return;
     }
-    
+
     LOG_ENABLED.store(true, Ordering::SeqCst);
-    
+
     env_logger::Builder::new()
         .filter_level(LevelFilter::Info)
         .format(|buf, record| {
             use std::io::Write;
-            
+
             let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S");
             let level = match record.level() {
                 log::Level::Error => "ERROR",
@@ -25,7 +25,7 @@ pub fn init(log_enabled: bool) {
                 log::Level::Debug => "DEBUG",
                 log::Level::Trace => "TRACE",
             };
-            
+
             writeln!(buf, "[{}] {} {}", timestamp, level, record.args())
         })
         .init();
