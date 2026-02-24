@@ -75,7 +75,7 @@ dotfiles-installer
 
 - [ ] User interaction - Ask questions instead of assuming things
 
-- [ ] CLI Arguments - So you don't have to edit the source code to change behavior
+- [x] CLI Arguments - So you don't have to edit the source code to change behavior
 
 - [ ] Config profiles - Different setups for different moods
 
