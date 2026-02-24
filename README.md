@@ -85,7 +85,7 @@ dotfiles-installer
 
 - [x] Package install - Make it actually install all the things
 
-- [ ] Logging - So you know what exploded and when
+- [x] Logging - So you know what exploded and when
 
 - [ ] Network retry - For when your wifi gives up
 
