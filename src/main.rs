@@ -7,7 +7,6 @@ mod hardware;
 mod packages;
 
 use cli::*;
-use std::io::Write;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = cli::parse();
@@ -115,11 +114,10 @@ fn execute_installation(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
     }
     
     // Configure laptop if needed
-    if !args.skip_hardware && !args.dry_run {
-        if hardware::utils::is_laptop() {
+    if !args.skip_hardware && !args.dry_run 
+        && hardware::utils::is_laptop() {
             print_progress("Configuring laptop settings...");
             dotfiles_manager::laptop::configure_laptop()?;
-        }
     }
     
     // Setup GPU drivers

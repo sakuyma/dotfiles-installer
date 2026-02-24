@@ -1,7 +1,5 @@
-use crate::cli::formatter::*;
-use super::super::{print_table, print_error};
-use crate::config;
 use clap::Args;
+use crate::config;
 
 #[derive(Args, Debug)]
 pub struct ListArgs {
@@ -15,8 +13,17 @@ pub struct ListArgs {
 pub fn execute(args: ListArgs) -> Result<(), Box<dyn std::error::Error>> {
     // Initialize config with default path
     let config_path = "~/.config/dotfiles-installer/config.toml";
-    if let Err(e) = config::init_with_path(config_path) {
-        print_error(&format!("Failed to load config: {}", e));
+    
+    // Expand ~ to home directory
+    let config_path = if config_path.starts_with("~/") {
+        let home = std::env::var("HOME")?;
+        config_path.replacen("~", &home, 1)
+    } else {
+        config_path.to_string()
+    };
+    
+    if let Err(e) = config::init_with_path(&config_path) {
+        eprintln!("Failed to load config: {}", e);
         return Ok(());
     }
     
@@ -43,6 +50,15 @@ pub fn execute(args: ListArgs) -> Result<(), Box<dyn std::error::Error>> {
         ]);
     }
     
-    print_table(&["Group", "Packages", "Dependencies"], &rows);
+    // Print table - исправленная строка
+    println!();
+    println!("{:<15} {:<10} Dependencies", "Group", "Packages");
+    println!("{:-<15} {:-<10} {:-<20}", "", "", "");
+    
+    for row in rows {
+        println!("{:<15} {:<10} {}", row[0], row[1], row[2]);
+    }
+    println!();
+    
     Ok(())
 }

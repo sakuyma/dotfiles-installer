@@ -30,7 +30,7 @@ impl ConfigParser {
         }
     }
 
-    fn apply_config(&self, config: Config) {
+    pub fn apply_config(&self, config: Config) {
         // Convert GitConfig to GitSettings
         let git_settings = settings::GitSettings {
             repo: config.git.as_ref().and_then(|g| g.repo.clone()),

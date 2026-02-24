@@ -1,9 +1,8 @@
-use super::{Args, Commands};
+use super::args::{Args, Commands};
+use super::commands::{list, install, remove, init};
 use std::env;
 
 pub fn handle_subcommand(cmd: Commands) -> Result<(), Box<dyn std::error::Error>> {
-    use super::commands::*;
-    
     match cmd {
         Commands::List(c) => list::execute(c),
         Commands::Install(c) => install::execute(c),

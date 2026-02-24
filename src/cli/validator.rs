@@ -4,10 +4,9 @@ pub fn validate_args(args: &Args) -> Result<(), Vec<String>> {
     let mut errors = Vec::new();
     
     // Validate config path if provided
-    if let Some(ref path) = args.config {
-        if path.is_empty() {
+    if let Some(ref path) = args.config 
+        && path.is_empty() {
             errors.push("Config path cannot be empty".to_string());
-        }
     }
     
     // Validate groups
@@ -18,6 +17,11 @@ pub fn validate_args(args: &Args) -> Result<(), Vec<String>> {
         if !group.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
             errors.push(format!("Invalid group name '{}': only letters, numbers, _ and - allowed", group));
         }
+    }
+    
+    // Validate combinations
+    if args.dry_run && args.force {
+        errors.push("Cannot use --dry-run with --force".to_string());
     }
     
     // Validate subcommands
