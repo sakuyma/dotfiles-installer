@@ -90,12 +90,10 @@ fn show_plan(args: &Args) {
         } else {
             print_key_value("Packages", &groups);
         }
+    } else if args.log {
+        log_step!("  Packages: skipped");
     } else {
-        if args.log {
-            log_step!("  Packages: skipped");
-        } else {
-            print_key_value("Packages", "skipped");
-        }
+        print_key_value("Packages", "skipped");
     }
 
     if !args.skip_dotfiles {
@@ -104,12 +102,10 @@ fn show_plan(args: &Args) {
         } else {
             print_key_value("Dotfiles", "will be cloned and stowed");
         }
+    } else if args.log {
+        log_step!("  Dotfiles: skipped");
     } else {
-        if args.log {
-            log_step!("  Dotfiles: skipped");
-        } else {
-            print_key_value("Dotfiles", "skipped");
-        }
+        print_key_value("Dotfiles", "skipped");
     }
 
     if !args.skip_hardware {
@@ -118,12 +114,10 @@ fn show_plan(args: &Args) {
         } else {
             print_key_value("Hardware", "GPU and laptop will be configured");
         }
+    } else if args.log {
+        log_step!("  Hardware: skipped");
     } else {
-        if args.log {
-            log_step!("  Hardware: skipped");
-        } else {
-            print_key_value("Hardware", "skipped");
-        }
+        print_key_value("Hardware", "skipped");
     }
 
     println!();
@@ -201,12 +195,10 @@ fn execute_installation(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
         } else {
             print_success("Dry run completed - no changes were made");
         }
+    } else if args.log {
+        log_success!("Installation completed successfully!");
     } else {
-        if args.log {
-            log_success!("Installation completed successfully!");
-        } else {
-            print_success("Installation completed successfully!");
-        }
+        print_success("Installation completed successfully!");
     }
 
     Ok(())

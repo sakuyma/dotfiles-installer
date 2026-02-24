@@ -38,7 +38,7 @@ pub fn is_log_enabled() -> bool {
 #[macro_export]
 macro_rules! output {
     ($($arg:tt)*) => {
-        if crate::logging::is_log_enabled() {
+        if $crate::logging::is_log_enabled() {
             log::info!($($arg)*);
         } else {
             println!($($arg)*);
@@ -49,7 +49,7 @@ macro_rules! output {
 #[macro_export]
 macro_rules! error_output {
     ($($arg:tt)*) => {
-        if crate::logging::is_log_enabled() {
+        if $crate::logging::is_log_enabled() {
             log::error!($($arg)*);
         } else {
             eprintln!($($arg)*);
@@ -60,7 +60,7 @@ macro_rules! error_output {
 #[macro_export]
 macro_rules! log_step {
     ($($arg:tt)*) => {
-        if crate::logging::is_log_enabled() {
+        if $crate::logging::is_log_enabled() {
             log::info!("{}", format_args!($($arg)*));
         }
     };
@@ -69,7 +69,7 @@ macro_rules! log_step {
 #[macro_export]
 macro_rules! log_success {
     ($($arg:tt)*) => {
-        if crate::logging::is_log_enabled() {
+        if $crate::logging::is_log_enabled() {
             log::info!("{}", format_args!($($arg)*));
         }
     };
@@ -78,7 +78,7 @@ macro_rules! log_success {
 #[macro_export]
 macro_rules! log_warning {
     ($($arg:tt)*) => {
-        if crate::logging::is_log_enabled() {
+        if $crate::logging::is_log_enabled() {
             log::warn!("{}", format_args!($($arg)*));
         }
     };
@@ -87,7 +87,7 @@ macro_rules! log_warning {
 #[macro_export]
 macro_rules! log_progress {
     ($($arg:tt)*) => {
-        if crate::logging::is_log_enabled() {
+        if $crate::logging::is_log_enabled() {
             log::info!("{}", format_args!($($arg)*));
         }
     };
