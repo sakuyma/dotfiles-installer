@@ -36,6 +36,10 @@ pub struct Args {
     #[arg(short = 'n', long)]
     pub dry_run: bool,
 
+    #[arg(long)]
+    pub log: bool,
+
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
