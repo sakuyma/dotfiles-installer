@@ -149,10 +149,11 @@ pull:
 # Full development check (format, lint, test, build)
 dev-check:
     @echo "Running full development checks..."
+    just clean
     just fmt
     just lint
     just test
-    just build
+    just build-release
     @echo "All checks passed!"
 
 # Quick check (just lint and test)
