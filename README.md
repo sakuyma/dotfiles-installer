@@ -73,7 +73,7 @@ dotfiles-installer
 
 - [x] Error handling - Actually handle errors instead of pretending they don't exist
 
-- [ ] User interaction - Ask questions instead of assuming things
+- [x] User interaction - Ask questions instead of assuming things
 
 - [x] CLI Arguments - So you don't have to edit the source code to change behavior
 
