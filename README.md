@@ -65,38 +65,38 @@ Options:
 ## Project structure
 .
 ├── config/               # Config parsing (where the magic starts)
-│   ├── mod.rs       
-│   ├── parser.rs    
-│   ├── settings.rs  
-│   └── structs.rs   
+│   ├── mod.rs             
+│   ├── parser.rs          
+│   ├── settings.rs        
+│   └── structs.rs         
 ├── dotfiles_manager/     # Dotfile handling (symlink city)
-│   ├── clone.rs     
-│   ├── install.rs   
-│   ├── laptop.rs    
-│   └── mod.rs       
+│   ├── clone.rs           
+│   ├── install.rs         
+│   ├── laptop.rs          
+│   └── mod.rs             
 ├── hardware/             # GPU drivers (prayer circle included)
-│   ├── amd.rs       
-│   ├── intel.rs     
-│   ├── mod.rs       
-│   ├── nvidia.rs    
-│   ├── utils.rs     
-│   └── videocard.rs 
+│   ├── amd.rs             
+│   ├── intel.rs           
+│   ├── mod.rs             
+│   ├── nvidia.rs          
+│   ├── utils.rs           
+│   └── videocard.rs       
 ├── packages/             # Package management (pacman's therapist)
-│   ├── install.rs   
-│   ├── list.rs      
-│   └── mod.rs       
+│   ├── install.rs         
+│   ├── list.rs            
+│   └── mod.rs             
 ├── utils/                # Utility functions (the duct tape)
 │   └── network_retry.rs  # Because wifi hates you
 ├── logging.rs            # Tracks your mistakes
-├── cli/                   # Command line interface (button pusher)
-│   ├── args.rs
-│   ├── commands/
-│   ├── formatter.rs
-│   ├── handlers.rs
-│   ├── interactive.rs
-│   ├── mod.rs
-│   ├── prompt_manager.rs
-│   └── validator.rs
+├── cli/                  # Command line interface (button pusher)
+│   ├── args.rs           
+│   ├── commands/i        
+│   ├── formatter.rs      
+│   ├── handlers.rs       
+│   ├── interactive.rs    
+│   ├── mod.rs            
+│   ├── prompt_manager.rs 
+│   └── validator.rs      
 └── main.rs                # Where the chaos begins
 
 
