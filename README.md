@@ -31,8 +31,6 @@ sudo ./target/release/dotfiles-installer
 ```bash
 dotfiles-installer
 
-# TODO: Add actual CLI arguments
-# Coming soon
 ```
 
 ## How it works
