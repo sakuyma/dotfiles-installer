@@ -1,14 +1,16 @@
 mod args;
-pub mod commands;
-mod formatter;
-mod handlers;
 mod validator;
+mod formatter;
+pub mod commands;
+mod handlers;
+mod interactive;
+mod prompt_manager;
 
-// Re-export everything needed
+// Re-export only what's actually used
 pub use args::Args;
-pub use formatter::*;
 pub use handlers::{handle_subcommand, resolve_config_path};
 pub use validator::validate_args;
+pub use prompt_manager::PromptManager;
 
 use clap::Parser;
 

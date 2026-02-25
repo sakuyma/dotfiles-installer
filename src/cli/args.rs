@@ -36,6 +36,15 @@ pub struct Args {
     #[arg(short = 'n', long)]
     pub dry_run: bool,
 
+    /// Assume yes to all prompts (non-interactive mode)
+    #[arg(short = 'y', long)]
+    pub assume_yes: bool,
+
+    /// Interactive mode - ask before each step
+    #[arg(short, long)]
+    pub interactive: bool,
+
+    // Enable logging in cosole with timestamps
     #[arg(long)]
     pub log: bool,
 

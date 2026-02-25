@@ -1,5 +1,4 @@
 use inquire::{Confirm, Select, MultiSelect, Text};
-use std::path::PathBuf;
 
 pub struct InteractivePrompt;
 
@@ -31,7 +30,12 @@ impl InteractivePrompt {
         MultiSelect::new(prompt, options)
             .with_help_message("Use space to select, enter to confirm")
             .prompt()
-            .map(|selected| selected.into_iter().map(|s| s.to_string()).collect())
+            .map(|selected| {
+                selected
+                    .into_iter()
+                    .map(|s| s.to_string())
+                    .collect()
+            })
             .unwrap_or_default()
     }
 
@@ -51,7 +55,6 @@ impl InteractivePrompt {
 }
 
 // Specialized prompts for dotfiles-installer
-
 pub fn select_package_groups(all_groups: &[String]) -> Vec<String> {
     let prompt = InteractivePrompt::new();
     let options: Vec<&str> = all_groups.iter().map(|s| s.as_str()).collect();

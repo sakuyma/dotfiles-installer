@@ -11,6 +11,7 @@ env_logger = "0.11.9"
 fern = "0.7.1"
 gfxinfo = "0.1.2"
 git2 = { version = "0.20.4", features = ["https"] }
+inquire = "0.9.4"
 log = "0.4.29"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"

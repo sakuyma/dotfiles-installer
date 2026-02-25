@@ -12,10 +12,13 @@ use cli::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = cli::parse();
 
-    // Initialize logging based on --log flag
-    logging::init(args.log);
+    // Initialize logging
+    logging::init(args.log)?;
 
-    // Validate arguments first
+    // Create prompt manager
+    let prompts = PromptManager::new(&args);
+
+    // Validate arguments
     if let Err(errors) = validate_args(&args) {
         for error in errors {
             error_output!("{}", error);
@@ -28,177 +31,132 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return handle_subcommand(cmd);
     }
 
-    // Otherwise run installation
-    run_installation(&args)
+    // Otherwise run installation with prompts
+    run_installation(&args, &prompts)
 }
 
-fn run_installation(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
+fn run_installation(
+    args: &Args,
+    prompts: &PromptManager,
+) -> Result<(), Box<dyn std::error::Error>> {
     output!("Dotfiles Installer v{}", env!("CARGO_PKG_VERSION"));
 
     if args.dry_run {
-        if args.log {
-            log_warning!("DRY RUN MODE - no changes will be made");
-        } else {
-            print_warning("DRY RUN MODE - no changes will be made");
-        }
+        log_warning!("DRY RUN MODE - no changes will be made");
     }
 
-    // Load config with optional custom path
+    // Load config
     let config_path = resolve_config_path(args)?;
     if args.verbose {
-        if args.log {
-            log_step!("Config: {}", config_path);
-        } else {
-            print_key_value("Config", &config_path);
-        }
+        log_step!("Config: {}", config_path);
     }
-
     config::init_with_path(&config_path)?;
 
-    // Show installation plan
-    show_plan(args);
-
-    // Confirm if not forced and not dry run
-    if !args.force && !args.dry_run && !confirm_installation() {
-        if args.log {
-            log_warning!("Installation cancelled");
-        } else {
-            print_warning("Installation cancelled");
-        }
-        return Ok(());
-    }
-
-    // Execute installation
-    execute_installation(args)
-}
-
-fn show_plan(args: &Args) {
-    if args.log {
-        log_step!("Installation plan:");
-    } else {
-        print_info("Installation plan:");
-    }
-
-    if !args.skip_packages {
-        let groups = if args.groups.is_empty() {
-            "all groups (default)".to_string()
-        } else {
-            format!("{:?}", args.groups)
-        };
-        if args.log {
-            log_step!("  Packages: {}", groups);
-        } else {
-            print_key_value("Packages", &groups);
-        }
-    } else if args.log {
-        log_step!("  Packages: skipped");
-    } else {
-        print_key_value("Packages", "skipped");
-    }
-
-    if !args.skip_dotfiles {
-        if args.log {
-            log_step!("  Dotfiles: will be cloned and stowed");
-        } else {
-            print_key_value("Dotfiles", "will be cloned and stowed");
-        }
-    } else if args.log {
-        log_step!("  Dotfiles: skipped");
-    } else {
-        print_key_value("Dotfiles", "skipped");
-    }
-
-    if !args.skip_hardware {
-        if args.log {
-            log_step!("  Hardware: GPU and laptop will be configured");
-        } else {
-            print_key_value("Hardware", "GPU and laptop will be configured");
-        }
-    } else if args.log {
-        log_step!("  Hardware: skipped");
-    } else {
-        print_key_value("Hardware", "skipped");
-    }
-
-    println!();
-}
-
-fn confirm_installation() -> bool {
-    print!("Proceed with installation? [y/N]: ");
-    std::io::Write::flush(&mut std::io::stdout()).unwrap();
-
-    let mut input = String::new();
-    std::io::stdin().read_line(&mut input).unwrap();
-    input.trim().eq_ignore_ascii_case("y")
-}
-
-fn execute_installation(args: &Args) -> Result<(), Box<dyn std::error::Error>> {
+    // Determine which groups to install
     let groups = if args.groups.is_empty() {
-        vec!["all".to_string()]
+        if prompts.interactive {
+            let all_groups: Vec<String> =
+                config::settings::package_groups().keys().cloned().collect();
+
+            if all_groups.is_empty() {
+                vec!["all".to_string()]
+            } else {
+                let options: Vec<&str> = all_groups.iter().map(|s| s.as_str()).collect();
+                prompts.select_multiple("Select package groups to install:", options)
+            }
+        } else {
+            vec!["all".to_string()]
+        }
     } else {
         args.groups.clone()
     };
 
-    // Clone dotfiles repo
-    if !args.skip_dotfiles && !args.dry_run {
-        if args.log {
-            log_progress!("Cloning dotfiles repository...");
-        } else {
-            print_progress("Cloning dotfiles repository...");
-        }
-        dotfiles_manager::clone::clone_repo()?;
+    // Show plan
+    show_plan(args, &groups);
+
+    // Confirm overall installation
+    if !args.assume_yes && !args.dry_run 
+        && !prompts.confirm("Proceed with installation?", false) {
+            log_warning!("Installation cancelled");
+            return Ok(());
     }
 
-    // Stow dotfiles
-    if !args.skip_dotfiles && !args.dry_run {
-        if args.log {
-            log_progress!("Stowing dotfiles...");
-        } else {
-            print_progress("Stowing dotfiles...");
-        }
-        dotfiles_manager::install::stow_config()?;
+    // Execute with step confirmation
+    execute_installation(args, prompts, &groups)
+}
+
+fn show_plan(args: &Args, groups: &[String]) {
+    log_step!("Installation plan:");
+
+    if !args.skip_packages {
+        log_step!("  Packages: {:?}", groups);
     }
+    if !args.skip_dotfiles {
+        log_step!("  Dotfiles: will be cloned and stowed");
+    }
+    if !args.skip_hardware {
+        log_step!("  Hardware: GPU and laptop will be configured");
+    }
+    println!();
+}
+
+fn execute_installation(
+    args: &Args,
+    prompts: &PromptManager,
+    groups: &[String],
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Clone dotfiles
+    if !args.skip_dotfiles && !args.dry_run
+        && prompts.confirm_step("Dotfiles", "Clone and stow dotfiles repository") {
+            log_progress!("Cloning dotfiles repository...");
+
+            // Use existing clone_repo function
+            dotfiles_manager::clone::clone_repo()?;
+            dotfiles_manager::install::stow_config()?;
+            log_success!("Dotfiles configured");
+        }
 
     // Configure laptop if needed
-    if !args.skip_hardware && !args.dry_run && hardware::utils::is_laptop() {
-        if args.log {
+    if !args.skip_hardware && !args.dry_run && hardware::utils::is_laptop()
+        && prompts.confirm_step("Laptop", "Configure laptop settings (TLP)") {
             log_progress!("Configuring laptop settings...");
-        } else {
-            print_progress("Configuring laptop settings...");
-        }
-        dotfiles_manager::laptop::configure_laptop()?;
+            dotfiles_manager::laptop::configure_laptop()?;
     }
 
     // Setup GPU drivers
-    if !args.skip_hardware && !args.dry_run {
-        if args.log {
+    if !args.skip_hardware && !args.dry_run
+        && prompts.confirm_step("GPU", "Install GPU drivers") {
             log_progress!("Setting up GPU drivers...");
-        } else {
-            print_progress("Setting up GPU drivers...");
-        }
-        hardware::videocard::setup_driver()?;
+
+            let gpu_options = vec!["auto-detect", "amd", "intel", "nvidia", "skip"];
+
+            if let Some(choice) = prompts.select("Select GPU drivers:", gpu_options) {
+                match choice.as_str() {
+                    "auto-detect" => hardware::videocard::setup_driver()?,
+                    "amd" => hardware::amd::setup()?,
+                    "intel" => hardware::intel::setup()?,
+                    "nvidia" => hardware::nvidia::setup()?,
+                    _ => {}
+                }
+            }
     }
 
     // Install packages
-    if !args.skip_packages && !args.dry_run {
-        if args.log {
-            log_progress!("Installing packages (groups: {:?})...", groups);
-        } else {
-            print_progress(&format!("Installing packages (groups: {:?})...", groups));
+    if !args.skip_packages && !args.dry_run 
+        && prompts.confirm_step(
+            "Packages",
+            format!("Install {:?} package groups", groups).as_str(),
+        ) {
+            log_progress!("Installing packages...");
+            packages::install::install_all(groups)?;
+            log_success!("Packages installed");
         }
-        packages::install::install_all(&groups)?;
-    }
+    
 
     if args.dry_run {
-        if args.log {
-            log_success!("Dry run completed - no changes were made");
-        } else {
-            print_success("Dry run completed - no changes were made");
-        }
-    } else if args.log {
-        log_success!("Installation completed successfully!");
+        log_success!("Dry run completed - no changes were made");
     } else {
-        print_success("Installation completed successfully!");
+        log_success!("Installation completed successfully!");
     }
 
     Ok(())
