@@ -1,8 +1,8 @@
+use crate::cli::formatter::*;
 use std::fs;
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use crate::cli::formatter::*;
 
 static CONFIG_PATH: &str = "/etc/mkinitcpio.conf";
 static MODULES: &str = "amdgpu radeon";
@@ -79,7 +79,10 @@ fn backup_config(path: &Path) -> io::Result<()> {
     let backup_path = path.with_extension("conf.bak");
     if !backup_path.exists() {
         fs::copy(path, &backup_path)?;
-        print_success(&format!("Backup saved at {:?} (safety first!)", backup_path));
+        print_success(&format!(
+            "Backup saved at {:?} (safety first!)",
+            backup_path
+        ));
     } else {
         print_warning("Backup already exists (we're consistent, if nothing else)");
     }

@@ -6,8 +6,10 @@ mod dotfiles_manager;
 mod hardware;
 mod logging;
 mod packages;
+mod utils;
 
 use cli::*;
+use crate::formatter::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = cli::parse();
@@ -42,7 +44,21 @@ fn run_installation(
     output!("Dotfiles Installer v{}", env!("CARGO_PKG_VERSION"));
 
     if args.dry_run {
-        log_warning!("DRY RUN MODE - no changes will be made");
+        print_warning("DRY RUN MODE - no changes will be made");
+        return Ok(());
+    }
+
+    // CHECK INTERNET CONNECTION WITH RETRY
+    print_progress("Checking internet connection...");
+
+    match utils::network_retry::ensure_internet_before_install() {
+        Ok(()) => {
+            print_success("Internet connection verified");
+        }
+        Err(e) => {
+            print_error(&format!("Cannot continue without internet: {}", e));
+            return Err(e.into());
+        }
     }
 
     // Load config
@@ -75,7 +91,7 @@ fn run_installation(
     show_plan(args, &groups);
 
     // Confirm overall installation
-    if !args.assume_yes && !args.dry_run 
+    if !args.assume_yes
         && !prompts.confirm("Proceed with installation?", false) {
             log_warning!("Installation cancelled");
             return Ok(());
@@ -86,16 +102,16 @@ fn run_installation(
 }
 
 fn show_plan(args: &Args, groups: &[String]) {
-    log_step!("Installation plan:");
+    print_progress("Installation plan:");
 
     if !args.skip_packages {
-        log_step!("  Packages: {:?}", groups);
+        print_progress(&format!("  Packages: {:?}", groups));
     }
     if !args.skip_dotfiles {
-        log_step!("  Dotfiles: will be cloned and stowed");
+        print_progress("  Dotfiles: will be cloned and stowed");
     }
     if !args.skip_hardware {
-        log_step!("  Hardware: GPU and laptop will be configured");
+        print_progress("  Hardware: GPU and laptop will be configured");
     }
     println!();
 }
@@ -106,52 +122,57 @@ fn execute_installation(
     groups: &[String],
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Clone dotfiles
-    if !args.skip_dotfiles && !args.dry_run
-        && prompts.confirm_step("Dotfiles", "Clone and stow dotfiles repository") {
-            log_progress!("Cloning dotfiles repository...");
+    if !args.skip_dotfiles
+        && !args.dry_run
+        && prompts.confirm_step("Dotfiles", "Clone and stow dotfiles repository")
+    {
+        log_progress!("Cloning dotfiles repository...");
 
-            // Use existing clone_repo function
-            dotfiles_manager::clone::clone_repo()?;
-            dotfiles_manager::install::stow_config()?;
-            log_success!("Dotfiles configured");
-        }
+        // Use existing clone_repo function
+        dotfiles_manager::clone::clone_repo()?;
+        dotfiles_manager::install::stow_config()?;
+        log_success!("Dotfiles configured");
+    }
 
     // Configure laptop if needed
-    if !args.skip_hardware && !args.dry_run && hardware::utils::is_laptop()
-        && prompts.confirm_step("Laptop", "Configure laptop settings (TLP)") {
-            log_progress!("Configuring laptop settings...");
-            dotfiles_manager::laptop::configure_laptop()?;
+    if !args.skip_hardware
+        && !args.dry_run
+        && hardware::utils::is_laptop()
+        && prompts.confirm_step("Laptop", "Configure laptop settings (TLP)")
+    {
+        log_progress!("Configuring laptop settings...");
+        dotfiles_manager::laptop::configure_laptop()?;
     }
 
     // Setup GPU drivers
-    if !args.skip_hardware && !args.dry_run
-        && prompts.confirm_step("GPU", "Install GPU drivers") {
-            log_progress!("Setting up GPU drivers...");
+    if !args.skip_hardware && !args.dry_run && prompts.confirm_step("GPU", "Install GPU drivers") {
+        log_progress!("Setting up GPU drivers...");
 
-            let gpu_options = vec!["auto-detect", "amd", "intel", "nvidia", "skip"];
+        let gpu_options = vec!["auto-detect", "amd", "intel", "nvidia", "skip"];
 
-            if let Some(choice) = prompts.select("Select GPU drivers:", gpu_options) {
-                match choice.as_str() {
-                    "auto-detect" => hardware::videocard::setup_driver()?,
-                    "amd" => hardware::amd::setup()?,
-                    "intel" => hardware::intel::setup()?,
-                    "nvidia" => hardware::nvidia::setup()?,
-                    _ => {}
-                }
+        if let Some(choice) = prompts.select("Select GPU drivers:", gpu_options) {
+            match choice.as_str() {
+                "auto-detect" => hardware::videocard::setup_driver()?,
+                "amd" => hardware::amd::setup()?,
+                "intel" => hardware::intel::setup()?,
+                "nvidia" => hardware::nvidia::setup()?,
+                _ => {}
             }
+        }
     }
 
     // Install packages
-    if !args.skip_packages && !args.dry_run 
+    if !args.skip_packages
+        && !args.dry_run
         && prompts.confirm_step(
             "Packages",
             format!("Install {:?} package groups", groups).as_str(),
-        ) {
-            log_progress!("Installing packages...");
-            packages::install::install_all(groups)?;
-            log_success!("Packages installed");
-        }
-    
+        )
+    {
+        log_progress!("Installing packages...");
+        packages::install::install_all(groups)?;
+        log_success!("Packages installed");
+    }
 
     if args.dry_run {
         log_success!("Dry run completed - no changes were made");

@@ -1,4 +1,4 @@
-use inquire::{Confirm, Select, MultiSelect, Text};
+use inquire::{Confirm, MultiSelect, Select, Text};
 
 pub struct InteractivePrompt;
 
@@ -30,12 +30,7 @@ impl InteractivePrompt {
         MultiSelect::new(prompt, options)
             .with_help_message("Use space to select, enter to confirm")
             .prompt()
-            .map(|selected| {
-                selected
-                    .into_iter()
-                    .map(|s| s.to_string())
-                    .collect()
-            })
+            .map(|selected| selected.into_iter().map(|s| s.to_string()).collect())
             .unwrap_or_default()
     }
 
@@ -58,7 +53,7 @@ impl InteractivePrompt {
 pub fn select_package_groups(all_groups: &[String]) -> Vec<String> {
     let prompt = InteractivePrompt::new();
     let options: Vec<&str> = all_groups.iter().map(|s| s.as_str()).collect();
-    
+
     prompt.select_multiple("Select package groups to install:", options)
 }
 
@@ -70,6 +65,9 @@ pub fn confirm_installation_step(step_name: &str, details: &str) -> bool {
 
 pub fn confirm_destructive_action(action: &str) -> bool {
     let prompt = InteractivePrompt::new();
-    let message = format!("WARNING: {} This may modify system files. Continue?", action);
+    let message = format!(
+        "WARNING: {} This may modify system files. Continue?",
+        action
+    );
     prompt.confirm(&message, false)
 }

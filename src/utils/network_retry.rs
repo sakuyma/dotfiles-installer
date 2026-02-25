@@ -33,14 +33,9 @@ impl Default for RetryConfig {
                 "Network is unreachable",
                 "Timeout",
                 "reset by peer",
-                "SSL",
-                "TLS",
                 "Could not resolve",
                 "Temporary failure",
-                "Broken pipe",
-                "Connection reset",
                 "Network error",
-                "Connection closed",
             ],
         }
     }
@@ -113,56 +108,8 @@ where
     Err(last_error.unwrap_or_else(|| "Unknown error".to_string()))
 }
 
-/// Specialized version for Command
-pub fn run_command_with_retry(
-    cmd: &mut Command,
-    config: &RetryConfig,
-    description: &str,
-) -> Result<(), String> {
-    with_retry(
-        || {
-            let output = cmd
-                .output()
-                .map_err(|e| format!("Failed to execute {}: {}", description, e))?;
-            
-            if output.status.success() {
-                Ok(())
-            } else {
-                let stderr = String::from_utf8_lossy(&output.stderr);
-                Err(format!("Command failed: {}", stderr))
-            }
-        },
-        config,
-        description,
-    )
-}
-
-/// Version for commands that return Output
-pub fn run_command_with_retry_output(
-    cmd: &mut Command,
-    config: &RetryConfig,
-    description: &str,
-) -> Result<std::process::Output, String> {
-    with_retry(
-        || {
-            cmd.output()
-                .map_err(|e| format!("Failed to execute {}: {}", description, e))
-                .and_then(|output| {
-                    if output.status.success() {
-                        Ok(output)
-                    } else {
-                        let stderr = String::from_utf8_lossy(&output.stderr);
-                        Err(format!("Command failed: {}", stderr))
-                    }
-                })
-        },
-        config,
-        description,
-    )
-}
-
-/// Check if a host is reachable (ping)
-pub fn check_host_reachable(host: &str, timeout_secs: u64) -> bool {
+/// Check internet connectivity by pinging a reliable host
+pub fn check_internet_connection(host: &str, timeout_secs: u64) -> bool {
     let status = Command::new("ping")
         .args(["-c", "1", "-W", &timeout_secs.to_string(), host])
         .status();
@@ -173,102 +120,124 @@ pub fn check_host_reachable(host: &str, timeout_secs: u64) -> bool {
     }
 }
 
-/// Wait for host to become reachable with retries
-pub fn wait_for_host(
+/// Wait for internet connection with retries before proceeding with installation
+pub fn wait_for_internet(
     host: &str,
     max_attempts: u32,
     delay_secs: u64,
 ) -> Result<(), String> {
+    print_progress(&format!("Checking internet connection to {}...", host));
+    
     let config = RetryConfig {
         max_attempts,
         strategy: RetryStrategy::Fixed(delay_secs),
-        retryable_keywords: vec!["Network is unreachable", "Connection refused"],
+        retryable_keywords: vec!["Network is unreachable", "Connection refused", "Timeout"],
     };
     
     with_retry(
         || {
-            if check_host_reachable(host, 5) {
+            if check_internet_connection(host, 5) {
+                print_success("Internet connection is available");
                 Ok(())
             } else {
-                Err(format!("Host {} is not reachable", host))
+                Err(format!("Cannot reach {}", host))
             }
         },
         &config,
-        &format!("Waiting for host {}", host),
+        "Internet connection check",
     )
+}
+
+/// Main function to call before installation
+pub fn ensure_internet_before_install() -> Result<(), String> {
+    // Try multiple hosts in case one is down
+    let hosts = ["archlinux.org", "github.com", "google.com"];
+    
+    for &host in &hosts {
+        match wait_for_internet(host, 2, 2) {
+            Ok(()) => return Ok(()),
+            Err(e) => print_warning(&format!("Failed to reach {}: {}", host, e)),
+        }
+    }
+    
+    Err("No internet connection available after trying multiple hosts".to_string())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::RefCell;
 
     #[test]
     fn test_retry_success_on_second_attempt() {
-        let mut attempts = 0;
         let config = RetryConfig {
             max_attempts: 3,
             strategy: RetryStrategy::Fixed(1),
             retryable_keywords: vec!["retry me"],
         };
         
+        let attempts = RefCell::new(0);
+        
         let result = with_retry(
             || {
-                attempts += 1;
-                if attempts < 2 {
+                *attempts.borrow_mut() += 1;
+                if *attempts.borrow() < 2 {
                     Err("retry me".to_string())
                 } else {
                     Ok(42)
                 }
             },
             &config,
-            "test operation",
+            "test",
         );
         
         assert_eq!(result, Ok(42));
-        assert_eq!(attempts, 2);
+        assert_eq!(*attempts.borrow(), 2);
     }
 
     #[test]
     fn test_retry_fails_after_max_attempts() {
-        let mut attempts = 0;
         let config = RetryConfig {
             max_attempts: 3,
             strategy: RetryStrategy::Fixed(1),
             retryable_keywords: vec!["retry me"],
         };
         
+        let attempts = RefCell::new(0);
+        
         let result = with_retry(
             || {
-                attempts += 1;
+                *attempts.borrow_mut() += 1;
                 Err("retry me".to_string())
             },
             &config,
-            "test operation",
+            "test",
         );
         
         assert!(result.is_err());
-        assert_eq!(attempts, 3);
+        assert_eq!(*attempts.borrow(), 3);
     }
 
     #[test]
     fn test_non_retryable_error() {
-        let mut attempts = 0;
         let config = RetryConfig {
             max_attempts: 3,
             strategy: RetryStrategy::Fixed(1),
             retryable_keywords: vec!["retry me"],
         };
         
+        let attempts = RefCell::new(0);
+        
         let result = with_retry(
             || {
-                attempts += 1;
+                *attempts.borrow_mut() += 1;
                 Err("fatal error".to_string())
             },
             &config,
-            "test operation",
+            "test",
         );
         
         assert!(result.is_err());
-        assert_eq!(attempts, 1); // Should stop on first attempt
+        assert_eq!(*attempts.borrow(), 1);
     }
 }

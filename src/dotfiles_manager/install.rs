@@ -1,5 +1,5 @@
-use crate::config::settings;
 use crate::cli::formatter::*;
+use crate::config::settings;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;

@@ -1,5 +1,5 @@
-use crate::config::settings;
 use crate::cli::formatter::*;
+use crate::config::settings;
 use std::env;
 use std::fs::{self, OpenOptions, read_to_string};
 use std::io::Write;
@@ -78,7 +78,7 @@ fn enable_auto_cpufreq() -> Result<(), String> {
         .arg("auto-cpufreq")
         .status()
         .map_err(|e| format!("Failed to check for auto-cpufreq: {}", e))?;
-    
+
     if !check.success() {
         return Err("auto-cpufreq not found. Install with: paru -S auto-cpufreq".to_string());
     }
@@ -109,7 +109,7 @@ pub fn configure_laptop() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     laptop_mode()?;
-    
+
     print_success("Laptop configuration completed");
     Ok(())
 }

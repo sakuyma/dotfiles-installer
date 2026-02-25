@@ -1,5 +1,5 @@
-use crate::packages::list;
 use crate::cli::formatter::*;
+use crate::packages::list;
 use std::collections::{HashMap, HashSet};
 use std::process::Command;
 
@@ -157,8 +157,11 @@ pub fn install_aur_packages(requested_groups: &[String]) -> Result<(), String> {
 }
 
 pub fn install_all(requested_groups: &[String]) -> Result<(), String> {
-    print_progress(&format!("Starting package installation for groups: {:?}", requested_groups));
-    
+    print_progress(&format!(
+        "Starting package installation for groups: {:?}",
+        requested_groups
+    ));
+
     install_pacman_packages(requested_groups)?;
     install_aur_packages(requested_groups)?;
 

@@ -1,5 +1,5 @@
-use log::LevelFilter;
 use chrono::Local;
+use log::LevelFilter;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -11,30 +11,30 @@ pub fn init(log_enabled: bool) -> Result<(), Box<dyn std::error::Error>> {
         LOG_ENABLED.store(false, Ordering::SeqCst);
         return Ok(());
     }
-    
+
     LOG_ENABLED.store(true, Ordering::SeqCst);
-    
+
     // Create cache directory
     let home = std::env::var("HOME")?;
     let log_dir = PathBuf::from(home)
         .join(".cache")
         .join("dotfiles-installer");
-    
+
     fs::create_dir_all(&log_dir)?;
-    
+
     let log_file = log_dir.join("install.log");
-    
+
     // Create archive directory for old logs
     let archive_dir = log_dir.join("archive");
     fs::create_dir_all(&archive_dir)?;
-    
+
     // Archive old log if it exists
     if log_file.exists() {
         let timestamp = Local::now().format("%Y%m%d_%H%M%S");
         let archive_path = archive_dir.join(format!("install_{}.log", timestamp));
         fs::rename(&log_file, &archive_path)?;
     }
-    
+
     // Setup fern logger
     fern::Dispatch::new()
         .format(|out, message, record| {
@@ -49,7 +49,7 @@ pub fn init(log_enabled: bool) -> Result<(), Box<dyn std::error::Error>> {
         .chain(fern::log_file(log_file)?)
         .chain(std::io::stdout())
         .apply()?;
-    
+
     Ok(())
 }
 

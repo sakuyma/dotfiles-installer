@@ -1,5 +1,5 @@
-use crate::config::settings;
 use crate::cli::formatter::*;
+use crate::config::settings;
 use git2::FetchOptions;
 use std::path::Path;
 
@@ -48,7 +48,10 @@ pub fn clone_repo() -> Result<(), Box<dyn std::error::Error>> {
 
     match builder.clone(repo_url, &path) {
         Ok(_repo) => {
-            print_success(&format!("Repository cloned successfully on branch: {}", branch));
+            print_success(&format!(
+                "Repository cloned successfully on branch: {}",
+                branch
+            ));
             Ok(())
         }
         Err(e) => {
@@ -107,9 +110,10 @@ pub fn clone_repo_with_depth() -> Result<(), Box<dyn std::error::Error>> {
             print_success("Repository cloned successfully");
 
             if let Ok(head) = repo.head()
-                && let Some(name) = head.shorthand() {
-                    print_success(&format!("Current branch: {}", name));
-                }
+                && let Some(name) = head.shorthand()
+            {
+                print_success(&format!("Current branch: {}", name));
+            }
 
             Ok(())
         }

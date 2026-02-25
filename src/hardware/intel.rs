@@ -1,5 +1,5 @@
-use std::process::Command;
 use crate::cli::formatter::*;
+use std::process::Command;
 
 // Check if we're root
 // because Intel drivers need admin privileges (they're fancy like that)
@@ -43,7 +43,9 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     }
 
     if all_installed {
-        print_success("Intel drivers already installed (typical Intel - already there when you need them)");
+        print_success(
+            "Intel drivers already installed (typical Intel - already there when you need them)",
+        );
         return Ok(true);
     }
 
@@ -95,7 +97,10 @@ pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
         Err(e) => {
-            print_error(&format!("Intel drivers failed to install (this never happens): {}", e));
+            print_error(&format!(
+                "Intel drivers failed to install (this never happens): {}",
+                e
+            ));
             Err(e)
         }
     }

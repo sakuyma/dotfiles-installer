@@ -1,5 +1,5 @@
-use crate::hardware::{amd, intel, nvidia};
 use crate::cli::formatter::*;
+use crate::hardware::{amd, intel, nvidia};
 
 // try to find out what gpu the user has
 // this is basically russian roullet
@@ -65,7 +65,10 @@ pub fn setup_driver() -> Result<(), Box<dyn std::error::Error>> {
         // b) gfxinfo doesn't recognize it
         // c) They're running in a VM and this whole thing was doomed anyway
         _ => {
-            print_warning(&format!("Unknown GPU vendor: {} - skipping driver installation", vendor));
+            print_warning(&format!(
+                "Unknown GPU vendor: {} - skipping driver installation",
+                vendor
+            ));
             Ok(())
         }
     }
