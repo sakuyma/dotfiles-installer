@@ -85,7 +85,7 @@ dotfiles-installer
 
 - [x] Logging - So you know what exploded and when
 
-- [ ] Network retry - For when your wifi gives up
+- [x] Network retry - For when your wifi gives up
 
 - [ ] Parallel - Make things faster by doing multiple things at once (maybe)
 
