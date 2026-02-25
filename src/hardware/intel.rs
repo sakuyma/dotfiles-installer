@@ -1,4 +1,5 @@
 use std::process::Command;
+use crate::cli::formatter::*;
 
 // Check if we're root
 // because Intel drivers need admin privileges (they're fancy like that)
@@ -18,7 +19,7 @@ fn check_package_installed(pkg: &str) -> bool {
 // Install Intel drivers - the blue team special
 // (these actually work out of the box, unlike some others)
 fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
-    println!("Checking Intel drivers... (the reliable ones)");
+    print_progress("Checking Intel drivers... (the reliable ones)");
 
     // The sacred Intel packages
     // (they've been around since the dawn of time)
@@ -42,16 +43,14 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     }
 
     if all_installed {
-        println!(
-            "Intel drivers already installed (typical Intel - already there when you need them)"
-        );
+        print_success("Intel drivers already installed (typical Intel - already there when you need them)");
         return Ok(true);
     }
 
-    println!(
+    print_progress(&format!(
         "Installing Intel drivers: {:?} (boring but functional)",
         missing_packages
-    );
+    ));
 
     // Call pacman (the friendly neighborhood package manager)
     let status = Command::new("pacman")
@@ -68,7 +67,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
         .status()?;
 
     if status.success() {
-        println!("Intel drivers installed! They work so well you'll forget they're there");
+        print_success("Intel drivers installed! They work so well you'll forget they're there");
         Ok(true)
     } else {
         Err(format!("pacman had a moment: {}", status).into())
@@ -77,7 +76,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
 
 // The main event - Intel driver installation (the boring, reliable kind)
 pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Setting up Intel drivers... (it's gonna be uneventful, promise)");
+    print_progress("Setting up Intel drivers... (it's gonna be uneventful, promise)");
 
     // Root check - because even Intel needs permissions sometimes
     if !is_root() {
@@ -87,19 +86,16 @@ pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
     // Install the drivers (they'll probably just work)
     match install_drivers() {
         Ok(true) => {
-            println!("Intel drivers setup complete! Your graphics will now be... adequate");
+            print_success("Intel drivers setup complete! Your graphics will now be... adequate");
             println!("You can reboot, or not, Intel doesn't care either way");
             Ok(())
         }
         Ok(false) => {
-            println!("Nothing changed (Intel was already perfect)");
+            print_warning("Nothing changed (Intel was already perfect)");
             Ok(())
         }
         Err(e) => {
-            eprintln!(
-                "Intel drivers failed to install (this never happens): {}",
-                e
-            );
+            print_error(&format!("Intel drivers failed to install (this never happens): {}", e));
             Err(e)
         }
     }

@@ -1,4 +1,5 @@
 use crate::packages::list;
+use crate::cli::formatter::*;
 use std::collections::{HashMap, HashSet};
 use std::process::Command;
 
@@ -99,8 +100,11 @@ pub fn install_pacman_packages(requested_groups: &[String]) -> Result<(), String
     let packages = get_pacman_packages(requested_groups);
 
     if packages.is_empty() {
+        print_warning("No pacman packages to install");
         return Ok(());
     }
+
+    print_progress(&format!("Installing pacman packages: {:?}", packages));
 
     let pkg_list = packages.join(" ");
     let cmd = format!("sudo pacman -S --noconfirm --needed {}", pkg_list);
@@ -112,8 +116,10 @@ pub fn install_pacman_packages(requested_groups: &[String]) -> Result<(), String
         .map_err(|e| format!("Error while installing pacman package: {}", e))?;
 
     if status.success() {
+        print_success("Pacman packages installed successfully");
         Ok(())
     } else {
+        print_error(&format!("Error while installing pacman packages: {}", cmd));
         Err(format!("Error while installing pacman packages: {}", cmd))
     }
 }
@@ -122,8 +128,11 @@ pub fn install_aur_packages(requested_groups: &[String]) -> Result<(), String> {
     let packages = get_aur_packages(requested_groups);
 
     if packages.is_empty() {
+        print_warning("No AUR packages to install");
         return Ok(());
     }
+
+    print_progress(&format!("Installing AUR packages: {:?}", packages));
 
     let pkg_list = packages.join(" ");
     let cmd = format!("paru -S --noconfirm {}", pkg_list);
@@ -139,16 +148,20 @@ pub fn install_aur_packages(requested_groups: &[String]) -> Result<(), String> {
         .map_err(|e| format!("Error running: {}", e))?;
 
     if status.success() {
+        print_success("AUR packages installed successfully");
         Ok(())
     } else {
-        eprintln!("Error");
+        print_error("Failed to install AUR packages");
         Ok(())
     }
 }
 
 pub fn install_all(requested_groups: &[String]) -> Result<(), String> {
+    print_progress(&format!("Starting package installation for groups: {:?}", requested_groups));
+    
     install_pacman_packages(requested_groups)?;
     install_aur_packages(requested_groups)?;
 
+    print_success("Package installation completed");
     Ok(())
 }

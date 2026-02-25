@@ -1,3 +1,4 @@
+use crate::cli::formatter::*;
 use std::env;
 use std::fs;
 
@@ -9,8 +10,9 @@ pub fn get_architecture() -> bool {
     if arch == "x86_64" {
         true
     } else {
-        eprintln!("ARM detected - I have no idea what you're doing here");
-        eprintln!("(seriously, ARM support is not a thing... yet)");
+        print_warning(
+            "ARM detected - I have no idea what you're doing here (seriously, ARM support is not a thing... yet)"
+        );
         false
     }
 }
@@ -37,9 +39,8 @@ pub fn is_laptop() -> bool {
                 // Double-check that this is actually a Battery and not
                 // some other weird power supply device the system invented
                 if let Ok(typ) = fs::read_to_string(path)
-                    && typ.trim() == "Battery"
-                {
-                    return true;
+                    && typ.trim() == "Battery" {
+                        return true;
                 }
             }
         }

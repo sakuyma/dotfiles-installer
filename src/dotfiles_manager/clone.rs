@@ -1,4 +1,5 @@
 use crate::config::settings;
+use crate::cli::formatter::*;
 use git2::FetchOptions;
 use std::path::Path;
 
@@ -24,12 +25,12 @@ pub fn clone_repo() -> Result<(), Box<dyn std::error::Error>> {
         Path::new(path_str).to_path_buf()
     };
 
-    println!(
+    print_progress(&format!(
         "Cloning {} (branch: {}) to {}",
         repo_url,
         branch,
         path.display()
-    );
+    ));
 
     // Prepare fetch options with HTTPS support
     let mut fetch_options = FetchOptions::new();
@@ -47,10 +48,13 @@ pub fn clone_repo() -> Result<(), Box<dyn std::error::Error>> {
 
     match builder.clone(repo_url, &path) {
         Ok(_repo) => {
-            println!("Repository cloned successfully on branch: {}", branch);
+            print_success(&format!("Repository cloned successfully on branch: {}", branch));
             Ok(())
         }
-        Err(e) => Err(format!("Error while cloning dotfiles repository: {}", e).into()),
+        Err(e) => {
+            print_error(&format!("Error while cloning dotfiles repository: {}", e));
+            Err(format!("Error while cloning dotfiles repository: {}", e).into())
+        }
     }
 }
 
@@ -70,12 +74,12 @@ pub fn clone_repo_with_depth() -> Result<(), Box<dyn std::error::Error>> {
         Path::new(path_str).to_path_buf()
     };
 
-    println!(
+    print_progress(&format!(
         "Cloning {} (branch: {}) to {}",
         repo_url,
         branch,
         path.display()
-    );
+    ));
 
     let mut fetch_options = FetchOptions::new();
     fetch_options.depth(1);
@@ -83,11 +87,11 @@ pub fn clone_repo_with_depth() -> Result<(), Box<dyn std::error::Error>> {
     let mut callbacks = git2::RemoteCallbacks::new();
     callbacks.transfer_progress(|stats| {
         if stats.received_objects() % 100 == 0 {
-            println!(
+            print_progress(&format!(
                 "Progress: {}/{} objects",
                 stats.received_objects(),
                 stats.total_objects()
-            );
+            ));
         }
         true
     });
@@ -100,17 +104,19 @@ pub fn clone_repo_with_depth() -> Result<(), Box<dyn std::error::Error>> {
 
     match builder.clone(repo_url, &path) {
         Ok(repo) => {
-            println!("Repository cloned successfully");
+            print_success("Repository cloned successfully");
 
             if let Ok(head) = repo.head()
-                && let Some(name) = head.shorthand()
-            {
-                println!("Current branch: {}", name);
-            }
+                && let Some(name) = head.shorthand() {
+                    print_success(&format!("Current branch: {}", name));
+                }
 
             Ok(())
         }
-        Err(e) => Err(format!("Failed to clone: {}", e).into()),
+        Err(e) => {
+            print_error(&format!("Failed to clone: {}", e));
+            Err(format!("Failed to clone: {}", e).into())
+        }
     }
 }
 
@@ -133,6 +139,13 @@ pub fn clone_private_repo(
         Path::new(path_str).to_path_buf()
     };
 
+    print_progress(&format!(
+        "Cloning private repository {} (branch: {}) to {}",
+        repo_url,
+        branch,
+        path.display()
+    ));
+
     let mut callbacks = git2::RemoteCallbacks::new();
     callbacks.credentials(|_url, _username, _allowed| {
         git2::Cred::userpass_plaintext(username, password)
@@ -148,9 +161,12 @@ pub fn clone_private_repo(
 
     match builder.clone(repo_url, &path) {
         Ok(_) => {
-            println!("Private repository cloned successfully");
+            print_success("Private repository cloned successfully");
             Ok(())
         }
-        Err(e) => Err(format!("Failed to clone private repo: {}", e).into()),
+        Err(e) => {
+            print_error(&format!("Failed to clone private repo: {}", e));
+            Err(format!("Failed to clone private repo: {}", e).into())
+        }
     }
 }

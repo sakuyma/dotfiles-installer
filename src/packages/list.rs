@@ -1,4 +1,5 @@
 use crate::config::settings;
+use crate::cli::formatter::*;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone)]
@@ -57,7 +58,7 @@ pub fn get_installation_order(requested_groups: &[String]) -> Vec<Vec<String>> {
         if current_round.is_empty() && !still_remaining.is_empty() {
             // Were stuck, someone created circular dependency
             // good luck debuggins THIS nightmare
-            println!("Cycle of dependies : {:?}", still_remaining);
+            print_warning(&format!("Cycle of dependencies detected: {:?}", still_remaining));
             break;
         }
 
@@ -80,6 +81,7 @@ pub fn get_packages_with_order(requested_groups: &[String]) -> Vec<String> {
     let order = get_installation_order(requested_groups);
     order.into_iter().flatten().collect()
 }
+
 // This dependency resolver is held together by god and regex
 // DO NOT TOUCH unless you enjoy untangling circular dependencies
 pub fn check_dependencies(group_name: &str) -> Vec<String> {

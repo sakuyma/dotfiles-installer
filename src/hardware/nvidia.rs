@@ -1,3 +1,4 @@
+use crate::cli::formatter::*;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -25,7 +26,7 @@ fn check_package_installed(pkg: &str) -> bool {
 // The main event - installing NVIDIA NOT proprietary blob
 // May cause: eye candy, heating issues, or existential dread
 fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
-    println!("Checking NVIDIA drivers... (please don't explode)");
+    print_progress("Checking NVIDIA drivers... (please don't explode)");
 
     // The sacred list of NVIDIA packages
     // (may or may not actually work with your GPU)
@@ -48,14 +49,14 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     }
 
     if all_installed {
-        println!("NVIDIA drivers already installed (someone beat us to it)");
+        print_success("NVIDIA drivers already installed (someone beat us to it)");
         return Ok(true);
     }
 
-    println!(
+    print_progress(&format!(
         "Installing NVIDIA drivers: {:?} (fingers crossed)",
         missing_packages
-    );
+    ));
 
     // Summon the pacman demon
     let status = Command::new("pacman")
@@ -71,7 +72,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
         .status()?;
 
     if status.success() {
-        println!("NVIDIA drivers installed! Your GPU may now demand more fans");
+        print_success("NVIDIA drivers installed! Your GPU may now demand more fans");
         Ok(true)
     } else {
         Err(format!("pacman cried with error code: {}", status).into())
@@ -83,9 +84,12 @@ fn backup_config(path: &Path) -> io::Result<()> {
     let backup_path = path.with_extension("conf.bak");
     if !backup_path.exists() {
         fs::copy(path, &backup_path)?;
-        println!("Backup created at {:?} (you're welcome)", backup_path);
+        print_success(&format!(
+            "Backup created at {:?} (you're welcome)",
+            backup_path
+        ));
     } else {
-        println!("Backup already exists (we're not THAT paranoid)");
+        print_warning("Backup already exists (we're not THAT paranoid)");
     }
     Ok(())
 }
@@ -127,7 +131,7 @@ fn mkinitcpio() -> io::Result<bool> {
             let new_inside = if existing.trim().is_empty() {
                 new_modules.to_string()
             } else if existing.contains("nvidia") {
-                println!("NVIDIA modules already lurking in config");
+                print_warning("NVIDIA modules already lurking in config");
                 existing.to_string() // Don't touch what's not broken
             } else {
                 format!("{} {}", existing, new_modules)
@@ -138,7 +142,7 @@ fn mkinitcpio() -> io::Result<bool> {
                 let new_line = format!("{}{}{}", before, new_inside, after);
                 lines.push(new_line);
                 modified = true;
-                println!("Injecting NVIDIA modules into MODULES line (science!)");
+                print_progress("Injecting NVIDIA modules into MODULES line (science!)");
             } else {
                 lines.push(line.to_string());
             }
@@ -150,7 +154,7 @@ fn mkinitcpio() -> io::Result<bool> {
     // Write changes if any (brave step)
     if modified {
         fs::write(config_path, lines.join("\n"))?;
-        println!("mkinitcpio.conf has been... modified");
+        print_success("mkinitcpio.conf has been... modified");
 
         // Verify our work (or lack thereof)
         let new_content = fs::read_to_string(config_path)?;
@@ -159,17 +163,17 @@ fn mkinitcpio() -> io::Result<bool> {
                 "Failed to add NVIDIA modules (the config fought back)",
             ));
         }
-        println!("Verified modules are now in the matrix");
+        print_success("Verified modules are now in the matrix");
 
         // Rebuild initramfs - the final boss
-        println!("Rebuilding initramfs... (this may take a while, go make tea)");
+        print_warning("Rebuilding initramfs... (this may take a while, go make tea)");
         let status = Command::new("mkinitcpio")
             .arg("-P")
             .status()
             .map_err(|e| io::Error::other(format!("mkinitcpio refused to run: {}", e)))?;
 
         if status.success() {
-            println!("Initramfs rebuilt! The kernel now knows about NVIDIA");
+            print_success("Initramfs rebuilt! The kernel now knows about NVIDIA");
             Ok(true)
         } else {
             Err(io::Error::other(
@@ -177,14 +181,14 @@ fn mkinitcpio() -> io::Result<bool> {
             ))
         }
     } else {
-        println!("No changes to mkinitcpio.conf (it was perfect already)");
+        print_warning("No changes to mkinitcpio.conf (it was perfect already)");
         Ok(false)
     }
 }
 
 // The grand finale - install NVIDIA drivers or die trying
 pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Attempting to tame the NVIDIA dragon...");
+    print_progress("Attempting to tame the NVIDIA dragon...");
 
     // Root check - because system files are like "no touchy" for regular users
     if !is_root() {
@@ -197,7 +201,7 @@ pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
     // Configure the system (black magic happens here)
     mkinitcpio()?;
 
-    println!("\nNVIDIA setup complete! Your GPU is now (probably) working");
+    print_success("\nNVIDIA setup complete! Your GPU is now (probably) working");
     println!("Reboot when you're ready to see if we broke anything");
 
     Ok(())

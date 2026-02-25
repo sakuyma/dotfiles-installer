@@ -2,6 +2,7 @@ use std::fs;
 use std::io;
 use std::path::Path;
 use std::process::Command;
+use crate::cli::formatter::*;
 
 static CONFIG_PATH: &str = "/etc/mkinitcpio.conf";
 static MODULES: &str = "amdgpu radeon";
@@ -25,7 +26,7 @@ fn check_package_installed(pkg: &str) -> bool {
 // The AMD experience - installing open source drivers that actually work
 // (unlike some other GPU vendors *cough* NVIDIA *cough*)
 fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
-    println!("Checking AMD drivers... (the open source ones, because AMD is cool like that)");
+    print_progress("Checking AMD drivers... (the open source ones, because AMD is cool like that)");
 
     // The holy list of AMD packages
     // (all open source, all free, all glorious)
@@ -43,14 +44,14 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
     }
 
     if all_installed {
-        println!("AMD drivers already installed (someone has good taste)");
+        print_success("AMD drivers already installed (someone has good taste)");
         return Ok(true);
     }
 
-    println!(
+    print_progress(&format!(
         "Installing AMD drivers: {:?} (the way Linus intended)",
         missing_packages
-    );
+    ));
 
     // Summon pacman (the friendly version, not the video game character)
     let status = Command::new("pacman")
@@ -66,7 +67,7 @@ fn install_drivers() -> Result<bool, Box<dyn std::error::Error>> {
         .status()?;
 
     if status.success() {
-        println!("AMD drivers installed! Your GPU is now free as in freedom");
+        print_success("AMD drivers installed! Your GPU is now free as in freedom");
         Ok(true)
     } else {
         Err(format!("pacman had an existential crisis: {}", status).into())
@@ -78,9 +79,9 @@ fn backup_config(path: &Path) -> io::Result<()> {
     let backup_path = path.with_extension("conf.bak");
     if !backup_path.exists() {
         fs::copy(path, &backup_path)?;
-        println!("Backup saved at {:?} (safety first!)", backup_path);
+        print_success(&format!("Backup saved at {:?} (safety first!)", backup_path));
     } else {
-        println!("Backup already exists (we're consistent, if nothing else)");
+        print_warning("Backup already exists (we're consistent, if nothing else)");
     }
     Ok(())
 }
@@ -121,7 +122,7 @@ fn mkinitcpio() -> io::Result<bool> {
             let new_inside = if existing.trim().is_empty() {
                 new_modules.to_string()
             } else if existing.contains("amdgpu") && existing.contains("radeon") {
-                println!("AMD modules already living rent-free in config");
+                print_warning("AMD modules already living rent-free in config");
                 existing.to_string() // Don't evict them
             } else if existing.contains("amdgpu") {
                 format!("{} radeon", existing)
@@ -136,7 +137,7 @@ fn mkinitcpio() -> io::Result<bool> {
                 let new_line = format!("{}{}{}", before, new_inside, after);
                 lines.push(new_line);
                 modified = true;
-                println!("Adding AMD modules to MODULES (they brought friends)");
+                print_progress("Adding AMD modules to MODULES (they brought friends)");
             } else {
                 lines.push(line.to_string());
             }
@@ -148,7 +149,7 @@ fn mkinitcpio() -> io::Result<bool> {
     // Commit changes to the system (scary stuff)
     if modified {
         fs::write(config_path, lines.join("\n"))?;
-        println!("mkinitcpio.conf has been updated (the system will never know)");
+        print_success("mkinitcpio.conf has been updated (the system will never know)");
 
         // Double-check our work like a paranoid sysadmin
         let new_content = fs::read_to_string(config_path)?;
@@ -157,17 +158,17 @@ fn mkinitcpio() -> io::Result<bool> {
                 "Failed to add AMD modules (the config is being stubborn)",
             ));
         }
-        println!("Verified AMD modules are now in the building");
+        print_success("Verified AMD modules are now in the building");
 
         // Rebuild initramfs - the moment of truth
-        println!("Rebuilding initramfs... (time to question your life choices)");
+        print_warning("Rebuilding initramfs... (time to question your life choices)");
         let status = Command::new("mkinitcpio")
             .arg("-P")
             .status()
             .map_err(|e| io::Error::other(format!("mkinitcpio said no: {}", e)))?;
 
         if status.success() {
-            println!("Initramfs rebuilt! Your kernel now knows about AMD");
+            print_success("Initramfs rebuilt! Your kernel now knows about AMD");
             Ok(true)
         } else {
             Err(io::Error::other(
@@ -175,14 +176,14 @@ fn mkinitcpio() -> io::Result<bool> {
             ))
         }
     } else {
-        println!("No changes to mkinitcpio.conf (it was already perfect)");
+        print_warning("No changes to mkinitcpio.conf (it was already perfect)");
         Ok(false)
     }
 }
 
 // The main event - AMD driver installation extravaganza
 pub fn setup() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Starting AMD driver installation (the red team awaits)");
+    print_progress("Starting AMD driver installation (the red team awaits)");
 
     // Root check - because we're not animals
     if !is_root() {

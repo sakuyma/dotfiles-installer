@@ -1,4 +1,5 @@
 use crate::config::settings;
+use crate::cli::formatter::*;
 use std::env;
 use std::fs::{self, OpenOptions, read_to_string};
 use std::io::Write;
@@ -6,7 +7,7 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn laptop_mode() -> Result<(), Box<dyn std::error::Error>> {
-    let home = env::var("HOME").expect("HOME не найден");
+    let home = env::var("HOME").expect("HOME not found");
     let hyprland_conf = PathBuf::from(&home).join(".config/hypr/hyprland.conf");
 
     let source_line = "source = ./modules/laptop.conf";
@@ -37,11 +38,12 @@ fn laptop_mode() -> Result<(), Box<dyn std::error::Error>> {
 
     writeln!(file, "{}", source_line)?;
 
+    print_success("Hyprland laptop mode configured");
     Ok(())
 }
 
 fn enable_tlp() -> Result<(), String> {
-    println!("Enabling TLP service...");
+    print_progress("Enabling TLP service...");
 
     // Enable and start TLP service
     let status = Command::new("systemctl")
@@ -53,7 +55,7 @@ fn enable_tlp() -> Result<(), String> {
         return Err("Failed to enable TLP service".to_string());
     }
 
-    println!("TLP enabled successfully");
+    print_success("TLP enabled successfully");
 
     // Enable tlp-sleep
     let _ = Command::new("systemctl")
@@ -69,14 +71,14 @@ fn enable_tlp() -> Result<(), String> {
 }
 
 fn enable_auto_cpufreq() -> Result<(), String> {
-    println!("Enabling auto-cpufreq service...");
+    print_progress("Enabling auto-cpufreq service...");
 
     // Check if auto-cpufreq is installed
     let check = Command::new("which")
         .arg("auto-cpufreq")
         .status()
         .map_err(|e| format!("Failed to check for auto-cpufreq: {}", e))?;
-    // Йо
+    
     if !check.success() {
         return Err("auto-cpufreq not found. Install with: paru -S auto-cpufreq".to_string());
     }
@@ -91,11 +93,13 @@ fn enable_auto_cpufreq() -> Result<(), String> {
         return Err("Failed to install auto-cpufreq service".to_string());
     }
 
-    println!("auto-cpufreq enabled successfully");
+    print_success("auto-cpufreq enabled successfully");
     Ok(())
 }
 
 pub fn configure_laptop() -> Result<(), Box<dyn std::error::Error>> {
+    print_progress("Configuring laptop settings...");
+
     if settings::is_tlp_enabled() {
         enable_tlp().map_err(std::io::Error::other)?;
     }
@@ -105,6 +109,8 @@ pub fn configure_laptop() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     laptop_mode()?;
+    
+    print_success("Laptop configuration completed");
     Ok(())
 }
 

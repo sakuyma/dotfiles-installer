@@ -1,6 +1,6 @@
 mod args;
 mod validator;
-mod formatter;
+pub mod formatter;
 pub mod commands;
 mod handlers;
 mod interactive;

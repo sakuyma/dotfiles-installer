@@ -1,4 +1,5 @@
 use crate::hardware::{amd, intel, nvidia};
+use crate::cli::formatter::*;
 
 // try to find out what gpu the user has
 // this is basically russian roullet
@@ -36,19 +37,27 @@ pub fn setup_driver() -> Result<(), Box<dyn std::error::Error>> {
     // Actually get the GPU vendor this time (revolutionary idea, I know)
     let vendor = what_vendor();
 
+    print_progress(&format!("Detected GPU vendor: {}", vendor));
+
     // Now install drivers based on what we found
     // (GPU vendors are inconsistent with capitalization, so good luck)
     match vendor.as_str() {
         "Nvidia" => {
+            print_progress("Setting up NVIDIA drivers...");
             nvidia::setup()?;
+            print_success("NVIDIA drivers configured successfully");
             Ok(())
         }
         "Amd" => {
+            print_progress("Setting up AMD drivers...");
             amd::setup()?;
+            print_success("AMD drivers configured successfully");
             Ok(())
         }
         "Intel" => {
+            print_progress("Setting up Intel drivers...");
             intel::setup()?;
+            print_success("Intel drivers configured successfully");
             Ok(())
         }
         // If we get here, either:
@@ -56,7 +65,7 @@ pub fn setup_driver() -> Result<(), Box<dyn std::error::Error>> {
         // b) gfxinfo doesn't recognize it
         // c) They're running in a VM and this whole thing was doomed anyway
         _ => {
-            eprintln!("Unknown Gpu: {}", vendor);
+            print_warning(&format!("Unknown GPU vendor: {} - skipping driver installation", vendor));
             Ok(())
         }
     }

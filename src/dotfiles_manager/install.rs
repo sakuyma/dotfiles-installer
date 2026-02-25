@@ -1,4 +1,5 @@
 use crate::config::settings;
+use crate::cli::formatter::*;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -26,11 +27,11 @@ pub fn stow_config() -> Result<(), String> {
         return Err(format!("{:?} is not a directory", stow_dir));
     }
 
-    println!(
+    print_progress(&format!(
         "Stowing dotfiles from {} to {}",
         stow_dir.display(),
         target_dir.display()
-    );
+    ));
 
     let status = Command::new("stow")
         .current_dir(&stow_dir)
@@ -42,9 +43,10 @@ pub fn stow_config() -> Result<(), String> {
         .map_err(|e| format!("Failed to execute stow: {}", e))?;
 
     if status.success() {
-        println!("Dotfiles stowed successfully");
+        print_success("Dotfiles stowed successfully");
         Ok(())
     } else {
+        print_error("Error while running stow");
         Err("Error while running stow".to_string())
     }
 }
