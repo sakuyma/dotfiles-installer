@@ -29,7 +29,27 @@ sudo ./target/release/dotfiles-installer
 ## Usage
 
 ```bash
-dotfiles-installer
+dotfiles-installer [OPTIONS] [COMMAND]
+
+Commands:
+  list      List available package groups (so you know what you're getting into)
+  install   Install specific packages (when groups are too mainstream)
+  remove    Remove packages (for when you regret everything)
+  init      Create example config (because reading docs is hard)
+  help      Print help (you are here)
+
+Options:
+  -c, --config <FILE>     Config file path (if you're fancy)
+  -v, --verbose           Tell me EVERYTHING (you'll regret this)
+  -g, --group <GROUP>     Package groups to install (pick your poison)
+  -y, --assume-yes        Answer yes to everything (living dangerously)
+  -i, --interactive       Ask before doing anything (for the cautious ones)
+  -n, --dry-run           Show what would happen (without actually breaking things)
+  -f, --force             Force reinstall (because sometimes things need a good slap)
+      --log               Write logs to ~/.cache/dotfiles-installer (for future therapists)
+  -h, --help              Print help (you're already here)
+  -V, --version           Print version (brag about it)
+
 
 ```
 
@@ -44,50 +64,70 @@ dotfiles-installer
 
 ## Project structure
 .
-├── config                
-│   ├── mod.rs       
-│   ├── parser.rs    
-│   ├── settings.rs  
-│   └── structs.rs   
-├── dotfiles_manager 
-│   ├── clone.rs     
-│   ├── install.rs   
-│   ├── laptop.rs    
-│   └── mod.rs       
-├── hardware         
-│   ├── amd.rs       
-│   ├── intel.rs     
-│   ├── mod.rs       
-│   ├── nvidia.rs    
-│   ├── utils.rs     
-│   └── videocard.rs 
-├── main.rs          
-└── packages         
-    ├── install.rs   
-    ├── list.rs      
-    └── mod.rs       
+├── config/               # Config parsing (where the magic starts)
+│   ├── mod.rs       
+│   ├── parser.rs    
+│   ├── settings.rs  
+│   └── structs.rs   
+├── dotfiles_manager/     # Dotfile handling (symlink city)
+│   ├── clone.rs     
+│   ├── install.rs   
+│   ├── laptop.rs    
+│   └── mod.rs       
+├── hardware/             # GPU drivers (prayer circle included)
+│   ├── amd.rs       
+│   ├── intel.rs     
+│   ├── mod.rs       
+│   ├── nvidia.rs    
+│   ├── utils.rs     
+│   └── videocard.rs 
+├── packages/             # Package management (pacman's therapist)
+│   ├── install.rs   
+│   ├── list.rs      
+│   └── mod.rs       
+├── utils/                # Utility functions (the duct tape)
+│   └── network_retry.rs  # Because wifi hates you
+├── logging.rs            # Tracks your mistakes
+├── cli/                   # Command line interface (button pusher)
+│   ├── args.rs
+│   ├── commands/
+│   ├── formatter.rs
+│   ├── handlers.rs
+│   ├── interactive.rs
+│   ├── mod.rs
+│   ├── prompt_manager.rs
+│   └── validator.rs
+└── main.rs                # Where the chaos begins
 
-## TODO
 
-- [x] Error handling - Actually handle errors instead of pretending they don't exist
-
-- [x] User interaction - Ask questions instead of assuming things
-
-- [x] CLI Arguments - So you don't have to edit the source code to change behavior
+## TODO (The "I'll get to it eventually" list)
 
 - [ ] Config profiles - Different setups for different moods
 
-- [x] Config file - So you don't have to edit the source code
+- [ ] System config - Set hostname, locale, timezone, etc without editing 15 files
+
+- [ ] User management - Actually create users instead of just talking about it 
+
+- [ ] Service control - Enable/disable systemd services without typing systemctl 50 times
+
+- [ ] Progress bars - Watch the magic happen in real-time
+
+- [ ] Quiet mode - Shut up and do the thing
+
+- [ ] Auto-commit - Because remembering to commit is so 2020 (automatic git commits when you change files)
+
+- [ ] Templates - Pre-made configs for common setups (desktop, server, potato)
+
+- [ ] Hooks - Run custom scripts because your setup is "special"
 
 - [ ] Rollback - For when things inevitably go wrong
 
-- [x] Package install - Make it actually install all the things
-
-- [x] Logging - So you know what exploded and when
-
-- [x] Network retry - For when your wifi gives up
-
 - [ ] Parallel - Make things faster by doing multiple things at once (maybe)
+
+
+## Contributing
+
+Found a bug? Want a feature? Open an issue. Better yet, open a PR and pretend you know what you're doing. We won't judge (much).
 
 ## License
 
@@ -103,3 +143,28 @@ MIT - Do whatever you want, just don't blame us if your computer catches fire.
 ## Disclaimer:
 
 This tool may or may not work. If it breaks your system, you get to keep both pieces. Use at your own risk, preferably with a backup (you have backups, right?).
+
+
+## Changelog
+
+### v0.1.3
+- Added network retry (because wifi hates you)
+- Made logs actually go to the file (for therapists)
+- Fixed many many lint error (I HATE LINTER)
+
+
+### v0.1.2
+- Added colored output (we're civilized now) 
+- Dry-run mode (for the cautious ones)
+- Interactive mode (for the indecisive ones)
+
+
+## Technical Debt
+
+This codebase is currently supported by:
+- Hope
+- Duct tape
+- Stack Overflow copy-paste
+- The Rust compiler's patience
+
+**TODO:** Remove crutches before someone breaks a leg
