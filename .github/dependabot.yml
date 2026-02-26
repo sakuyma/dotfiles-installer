@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    target-branch: "main"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
+    groups:
+      minor-and-patch:
+        patterns: [ "*" ]
+        update-types: [ "minor", "patch" ]
+      major-updates:
+        patterns: [ "*" ]
+        update-types: [ "major" ]
+        exclude-patterns:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci"
+      - "dependencies"
+    groups:
+      actions:
+        patterns: [ "*" ]
