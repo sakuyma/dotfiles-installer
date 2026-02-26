@@ -16,7 +16,6 @@ updates:
       major-updates:
         patterns: [ "*" ]
         update-types: [ "major" ]
-        exclude-patterns:
 
   - package-ecosystem: "github-actions"
     directory: "/"
