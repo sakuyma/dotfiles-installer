@@ -100,23 +100,24 @@ Options:
 └── main.rs                # Where the chaos begins
 
 
-## TODO (The "I'll get to it eventually" list)
+## Roadmap (The "I'll get to it eventually" list)
+### Coming up next
+
+- [ ] Progress bars - Watch the magic happen in real-time
+
+- [ ] Templates - Pre-made configs for common setups (desktop, server, potato)
+
+- [ ] User management - Actually create users instead of just talking about it
+
+- [ ] System config - Set hostname, locale, timezone, etc without editing 15 files
+
+### Maybe someday
 
 - [ ] Config profiles - Different setups for different moods
 
 - [ ] System config - Set hostname, locale, timezone, etc without editing 15 files
 
-- [ ] User management - Actually create users instead of just talking about it 
-
-- [ ] Service control - Enable/disable systemd services without typing systemctl 50 times
-
-- [ ] Progress bars - Watch the magic happen in real-time
-
-- [ ] Quiet mode - Shut up and do the thing
-
 - [ ] Auto-commit - Because remembering to commit is so 2020 (automatic git commits when you change files)
-
-- [ ] Templates - Pre-made configs for common setups (desktop, server, potato)
 
 - [ ] Hooks - Run custom scripts because your setup is "special"
 
@@ -153,12 +154,6 @@ This tool may or may not work. If it breaks your system, you get to keep both pi
 - Fixed many many lint error (I HATE LINTER)
 
 
-### v0.1.2
-- Added colored output (we're civilized now) 
-- Dry-run mode (for the cautious ones)
-- Interactive mode (for the indecisive ones)
-
-
 ## Technical Debt
 
 This codebase is currently supported by:
@@ -168,3 +163,6 @@ This codebase is currently supported by:
 - The Rust compiler's patience
 
 **TODO:** Remove crutches before someone breaks a leg
+
+
+## If you like it, drop a star!
