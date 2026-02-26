@@ -201,7 +201,7 @@ mod tests {
 
         let attempts = RefCell::new(0);
 
-        let result = with_retry(
+        let result = with_retry::<(), _>(
             || {
                 *attempts.borrow_mut() += 1;
                 Err("retry me".to_string())
@@ -224,7 +224,7 @@ mod tests {
 
         let attempts = RefCell::new(0);
 
-        let result = with_retry(
+        let result = with_retry::<(), _>(
             || {
                 *attempts.borrow_mut() += 1;
                 Err("fatal error".to_string())
