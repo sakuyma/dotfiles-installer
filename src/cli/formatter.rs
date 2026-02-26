@@ -1,22 +1,57 @@
 use colored::*;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static QUIET_MODE: AtomicBool = AtomicBool::new(false);
+
+pub fn set_quiet(quiet: bool) {
+    QUIET_MODE.store(quiet, Ordering::SeqCst);
+}
+
+pub fn is_quiet() -> bool {
+    QUIET_MODE.load(Ordering::SeqCst)
+}
 
 pub fn print_success(msg: &str) {
-    println!("{}", msg.green());
+    if !is_quiet() {
+        println!("{}", msg.green());
+    }
 }
 
 pub fn print_error(msg: &str) {
+    // Errors are always shown, even in quiet mode
     eprintln!("{}", msg.red());
 }
 
 pub fn print_warning(msg: &str) {
-    println!("{}", msg.yellow());
+    if !is_quiet() {
+        println!("{}", msg.yellow());
+    }
 }
 
 pub fn print_progress(msg: &str) {
-    println!("{}", msg.cyan());
+    if !is_quiet() {
+        println!("{}", msg.cyan());
+    }
 }
 
+pub fn print_info(msg: &str) {
+    if !is_quiet() {
+        println!("{}", msg.blue());
+    }
+}
+
+pub fn print_key_value(key: &str, value: &str) {
+    if !is_quiet() {
+        println!("  {}: {}", key.cyan(), value.white());
+    }
+}
+
+// For table output - suppress entirely in quiet mode
 pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
+    if is_quiet() {
+        return;
+    }
+
     if rows.is_empty() {
         return;
     }
@@ -58,23 +93,4 @@ pub fn print_table(headers: &[&str], rows: &[Vec<String>]) {
         println!();
     }
     println!();
-}
-
-pub fn print_info(msg: &str) {
-    println!("{}", msg.blue());
-}
-
-pub fn print_debug(msg: &str) {
-    if cfg!(debug_assertions) {
-        println!("{}", msg.bright_magenta());
-    }
-}
-
-pub fn print_key_value(key: &str, value: &str) {
-    println!("  {}: {}", key.cyan(), value.white());
-}
-
-pub fn print_check(label: &str, success: bool) {
-    let mark = if success { "✓".green() } else { "✗".red() };
-    println!("  {} {}", mark, label);
 }

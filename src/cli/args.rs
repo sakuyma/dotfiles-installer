@@ -48,6 +48,10 @@ pub struct Args {
     #[arg(long)]
     pub log: bool,
 
+    /// Quiet mode - suppress all output (only errors)
+    #[arg(long)]
+    pub quiet: bool,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }

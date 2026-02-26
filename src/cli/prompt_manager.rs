@@ -1,10 +1,12 @@
-use super::Args;
 use super::interactive::InteractivePrompt;
+use super::Args;
 
 pub struct PromptManager {
     pub interactive: bool,
     pub assume_yes: bool,
+    pub quiet: bool,
     prompt: InteractivePrompt,
+    
 }
 
 impl PromptManager {
@@ -12,11 +14,17 @@ impl PromptManager {
         Self {
             interactive: args.interactive,
             assume_yes: args.assume_yes,
+            quiet: args.quiet,
             prompt: InteractivePrompt::new(),
         }
     }
 
     pub fn confirm(&self, message: &str, default: bool) -> bool {
+        // In quiet mode, always return default without asking
+        if self.quiet {
+            return default;
+        }
+
         if self.assume_yes {
             return true;
         }

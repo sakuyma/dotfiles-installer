@@ -1,7 +1,7 @@
 use crate::cli::formatter::*;
+use std::process::Command;
 use std::thread;
 use std::time::Duration;
-use std::process::Command;
 
 /// Delay strategy between retry attempts
 pub enum RetryStrategy {
@@ -51,7 +51,7 @@ where
     F: FnMut() -> Result<T, String>,
 {
     let mut last_error = None;
-    
+
     for attempt in 1..=config.max_attempts {
         match operation() {
             Ok(result) => {
@@ -65,15 +65,16 @@ where
             }
             Err(e) => {
                 let error_msg = e.to_lowercase();
-                let should_retry = config.retryable_keywords
+                let should_retry = config
+                    .retryable_keywords
                     .iter()
                     .any(|&keyword| error_msg.contains(&keyword.to_lowercase()));
-                
+
                 if !should_retry {
                     print_error(&format!("Non-retryable error: {}", e));
                     return Err(e);
                 }
-                
+
                 if attempt == config.max_attempts {
                     print_error(&format!(
                         "{} failed after {} attempts: {}",
@@ -81,30 +82,27 @@ where
                     ));
                     return Err(e);
                 }
-                
+
                 print_warning(&format!(
                     "{} failed (attempt {}/{}): {}",
                     operation_name, attempt, config.max_attempts, e
                 ));
-                
+
                 // Calculate delay based on strategy
                 let delay_secs = match config.strategy {
                     RetryStrategy::Fixed(delay) => delay,
                     RetryStrategy::Exponential(initial) => initial * 2u64.pow(attempt - 1),
                     RetryStrategy::Linear(step) => step * attempt as u64,
                 };
-                
-                print_progress(&format!(
-                    "Waiting {} seconds before retry...",
-                    delay_secs
-                ));
-                
+
+                print_progress(&format!("Waiting {} seconds before retry...", delay_secs));
+
                 thread::sleep(Duration::from_secs(delay_secs));
                 last_error = Some(e);
             }
         }
     }
-    
+
     Err(last_error.unwrap_or_else(|| "Unknown error".to_string()))
 }
 
@@ -112,8 +110,10 @@ where
 pub fn check_internet_connection(host: &str, timeout_secs: u64) -> bool {
     let status = Command::new("ping")
         .args(["-c", "1", "-W", &timeout_secs.to_string(), host])
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
         .status();
-    
+
     match status {
         Ok(status) => status.success(),
         Err(_) => false,
@@ -121,19 +121,15 @@ pub fn check_internet_connection(host: &str, timeout_secs: u64) -> bool {
 }
 
 /// Wait for internet connection with retries before proceeding with installation
-pub fn wait_for_internet(
-    host: &str,
-    max_attempts: u32,
-    delay_secs: u64,
-) -> Result<(), String> {
+pub fn wait_for_internet(host: &str, max_attempts: u32, delay_secs: u64) -> Result<(), String> {
     print_progress(&format!("Checking internet connection to {}...", host));
-    
+
     let config = RetryConfig {
         max_attempts,
         strategy: RetryStrategy::Fixed(delay_secs),
         retryable_keywords: vec!["Network is unreachable", "Connection refused", "Timeout"],
     };
-    
+
     with_retry(
         || {
             if check_internet_connection(host, 5) {
@@ -152,14 +148,14 @@ pub fn wait_for_internet(
 pub fn ensure_internet_before_install() -> Result<(), String> {
     // Try multiple hosts in case one is down
     let hosts = ["archlinux.org", "github.com", "google.com"];
-    
+
     for &host in &hosts {
         match wait_for_internet(host, 2, 2) {
             Ok(()) => return Ok(()),
             Err(e) => print_warning(&format!("Failed to reach {}: {}", host, e)),
         }
     }
-    
+
     Err("No internet connection available after trying multiple hosts".to_string())
 }
 
@@ -175,9 +171,9 @@ mod tests {
             strategy: RetryStrategy::Fixed(1),
             retryable_keywords: vec!["retry me"],
         };
-        
+
         let attempts = RefCell::new(0);
-        
+
         let result = with_retry(
             || {
                 *attempts.borrow_mut() += 1;
@@ -190,7 +186,7 @@ mod tests {
             &config,
             "test",
         );
-        
+
         assert_eq!(result, Ok(42));
         assert_eq!(*attempts.borrow(), 2);
     }
@@ -202,9 +198,9 @@ mod tests {
             strategy: RetryStrategy::Fixed(1),
             retryable_keywords: vec!["retry me"],
         };
-        
+
         let attempts = RefCell::new(0);
-        
+
         let result = with_retry(
             || {
                 *attempts.borrow_mut() += 1;
@@ -213,7 +209,7 @@ mod tests {
             &config,
             "test",
         );
-        
+
         assert!(result.is_err());
         assert_eq!(*attempts.borrow(), 3);
     }
@@ -225,9 +221,9 @@ mod tests {
             strategy: RetryStrategy::Fixed(1),
             retryable_keywords: vec!["retry me"],
         };
-        
+
         let attempts = RefCell::new(0);
-        
+
         let result = with_retry(
             || {
                 *attempts.borrow_mut() += 1;
@@ -236,7 +232,7 @@ mod tests {
             &config,
             "test",
         );
-        
+
         assert!(result.is_err());
         assert_eq!(*attempts.borrow(), 1);
     }
