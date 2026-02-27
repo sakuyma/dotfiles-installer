@@ -1,5 +1,6 @@
 use crate::cli::formatter::*;
 use crate::packages::list;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::collections::{HashMap, HashSet};
 use std::process::Command;
 
@@ -39,7 +40,7 @@ pub fn get_pacman_packages(requested_groups: &[String]) -> Vec<String> {
             &groups,
             &mut result,
             &mut processed,
-            false, // ik
+            false, // not AUR
         );
     }
 
@@ -59,7 +60,7 @@ pub fn get_aur_packages(requested_groups: &[String]) -> Vec<String> {
             &groups,
             &mut result,
             &mut processed,
-            true, // idk
+            true, // AUR
         );
     }
 
@@ -73,7 +74,7 @@ fn collect_packages_by_type(
     groups: &HashMap<String, list::PackageGroup>,
     result: &mut Vec<String>,
     processed: &mut HashSet<String>,
-    want_aur: bool, // true -  AUR, false - not AUR
+    want_aur: bool,
 ) {
     if processed.contains(group_name) {
         return;
@@ -87,7 +88,7 @@ fn collect_packages_by_type(
             collect_packages_by_type(dep, groups, result, processed, want_aur);
         }
 
-        // add only if package group is in aur
+        // Add only if package group matches desired type
         if is_aur == want_aur {
             result.extend(group.packages.clone());
         }
@@ -96,6 +97,7 @@ fn collect_packages_by_type(
     }
 }
 
+/// Install pacman packages with progress bar
 pub fn install_pacman_packages(requested_groups: &[String]) -> Result<(), String> {
     let packages = get_pacman_packages(requested_groups);
 
@@ -104,26 +106,45 @@ pub fn install_pacman_packages(requested_groups: &[String]) -> Result<(), String
         return Ok(());
     }
 
-    print_progress(&format!("Installing pacman packages: {:?}", packages));
+    println!(); // Empty line for better visual separation
+    let bar = ProgressBar::new(packages.len() as u64);
+    bar.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} [{msg}]")
+            .unwrap()
+            .progress_chars("█▓▒░-"),
+    );
+    bar.set_message("Installing pacman packages...");
 
-    let pkg_list = packages.join(" ");
-    let cmd = format!("sudo pacman -S --noconfirm --needed {}", pkg_list);
+    let mut failed_packages = Vec::new();
 
-    let status = Command::new("sh")
-        .arg("-c")
-        .arg(&cmd)
-        .status()
-        .map_err(|e| format!("Error while installing pacman package: {}", e))?;
+    for (i, pkg) in packages.iter().enumerate() {
+        bar.set_message(format!("Installing {} ({}/{})", pkg, i + 1, packages.len()));
 
-    if status.success() {
-        print_success("Pacman packages installed successfully");
+        let status = Command::new("sudo")
+            .args(["pacman", "-S", "--noconfirm", "--needed", pkg])
+            .status()
+            .map_err(|e| format!("Error while installing pacman package {}: {}", pkg, e))?;
+
+        if status.success() {
+            bar.inc(1);
+        } else {
+            failed_packages.push(pkg.clone());
+            bar.println(format!("Failed to install {}", pkg));
+        }
+    }
+
+    if failed_packages.is_empty() {
+        bar.finish_with_message("All pacman packages installed successfully");
         Ok(())
     } else {
-        print_error(&format!("Error while installing pacman packages: {}", cmd));
-        Err(format!("Error while installing pacman packages: {}", cmd))
+        bar.finish_with_message("Some packages failed to install");
+        print_error(&format!("Failed to install: {:?}", failed_packages));
+        Err(format!("Failed to install: {:?}", failed_packages))
     }
 }
 
+/// Install AUR packages with progress bar
 pub fn install_aur_packages(requested_groups: &[String]) -> Result<(), String> {
     let packages = get_aur_packages(requested_groups);
 
@@ -132,39 +153,61 @@ pub fn install_aur_packages(requested_groups: &[String]) -> Result<(), String> {
         return Ok(());
     }
 
-    print_progress(&format!("Installing AUR packages: {:?}", packages));
+    println!(); // Empty line for better visual separation
+    let bar = ProgressBar::new(packages.len() as u64);
+    bar.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.yellow} [{bar:40.magenta/blue}] {pos}/{len} [{msg}]")
+            .unwrap()
+            .progress_chars("█▓▒░-"),
+    );
+    bar.set_message("Installing AUR packages...");
 
-    let pkg_list = packages.join(" ");
-    let cmd = format!("paru -S --noconfirm {}", pkg_list);
     let user = std::env::var("SUDO_USER").unwrap_or_else(|_| "nobody".to_string());
+    let mut failed_packages = Vec::new();
 
-    let status = Command::new("sudo")
-        .arg("-u")
-        .arg(&user)
-        .arg("sh")
-        .arg("-c")
-        .arg(&cmd)
-        .status()
-        .map_err(|e| format!("Error running: {}", e))?;
+    for (i, pkg) in packages.iter().enumerate() {
+        bar.set_message(format!("Building {} from AUR ({}/{})", pkg, i + 1, packages.len()));
 
-    if status.success() {
-        print_success("AUR packages installed successfully");
+        let status = Command::new("sudo")
+            .arg("-u")
+            .arg(&user)
+            .arg("paru")
+            .args(["-S", "--noconfirm", pkg])
+            .status()
+            .map_err(|e| format!("Error while installing AUR package {}: {}", pkg, e))?;
+
+        if status.success() {
+            bar.inc(1);
+        } else {
+            failed_packages.push(pkg.clone());
+            bar.println(format!("Failed to install {}", pkg));
+        }
+    }
+
+    if failed_packages.is_empty() {
+        bar.finish_with_message("All AUR packages installed successfully");
         Ok(())
     } else {
-        print_error("Failed to install AUR packages");
-        Ok(())
+        bar.finish_with_message("Some AUR packages failed to install");
+        print_error(&format!("Failed to install: {:?}", failed_packages));
+        Err(format!("Failed to install: {:?}", failed_packages))
     }
 }
 
+/// Install all packages (pacman first, then AUR) with progress bars
 pub fn install_all(requested_groups: &[String]) -> Result<(), String> {
     print_progress(&format!(
         "Starting package installation for groups: {:?}",
         requested_groups
     ));
 
+    // First install pacman packages (they lock the database)
     install_pacman_packages(requested_groups)?;
+
+    // Then install AUR packages
     install_aur_packages(requested_groups)?;
 
-    print_success("Package installation completed");
+    print_success("All packages installed successfully");
     Ok(())
 }
