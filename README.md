@@ -1,5 +1,9 @@
 # Dotfiles Installer
 
+[![AUR version](https://img.shields.io/aur/version/dotfiles-installer)](https://aur.archlinux.org/packages/dotfiles-installer)
+[![AUR votes](https://img.shields.io/aur/votes/dotfiles-installer)](https://aur.archlinux.org/packages/dotfiles-installer)
+[![AUR license](https://img.shields.io/aur/license/dotfiles-installer)](https://aur.archlinux.org/packages/dotfiles-installer)
+
 A Rust-powered tool to set up your Arch Linux system with dotfiles, drivers, and packages. Because doing it manually is so 2020.
 
 ## Features
@@ -19,7 +23,18 @@ A Rust-powered tool to set up your Arch Linux system with dotfiles, drivers, and
 
 ## Installation
 
+### Arch Linux (AUR)
+The package is available in the [AUR](https://aur.archlinux.org/packages/dotfiles-installer):
+
+
 ```bash
+# Using yay
+yay -S dotfiles-installer
+
+# Using paru
+paru -S dotfiles-installer
+
+# From source
 git clone https://github.com/sakuyma/dotfiles-installer
 cd dotfiles-installer
 cargo build --release
@@ -148,9 +163,7 @@ This tool may or may not work. If it breaks your system, you get to keep both pi
 
 ## Changelog
 
-### v0.1.3
-- Added network retry (because wifi hates you)
-- Made logs actually go to the file (for therapists)
+### v0.1.5
 - Fixed many many lint error (I HATE LINTER)
 
 
