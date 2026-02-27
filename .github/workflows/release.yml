@@ -15,12 +15,12 @@ jobs:
           target: x86_64-unknown-linux-gnu
 
       - name: Build
-        run: cargo build --release --target x86_64-unknown-linux-musl
+        run: cargo build --release --target x86_64-unknown-linux-gnu
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          files: target/x86_64-unknown-linux-musl/release/dotfiles-installer
+          files: target/x86_64-unknown-linux-gnu/release/dotfiles-installer
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
