@@ -10,7 +10,6 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-backoff = "0.4.0"
 chrono = "0.4.44"
 clap = { version = "4.5.60", features = ["derive"] }
 colored = "3.1.1"
