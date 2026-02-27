@@ -43,12 +43,12 @@ impl<'a> Lexer<'a> {
         ch
     }
 
-    fn peek_char(&self) -> Option<&char> {
+    fn peek_char(&mut self) -> Option<&char> {
         self.chars.peek()
     }
 
     /// Look at the next character without consuming it (peek next)
-    fn peek_next(&self) -> Option<char> {
+    fn peek_next(&mut self) -> Option<char> {
         let mut chars = self.chars.clone();
         chars.next(); // skip current
         chars.peek().copied()
