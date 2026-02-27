@@ -1,8 +1,8 @@
 use crate::config::parser::Parser;
-use crate::config::settings;
 use std::collections::HashMap;
 use std::path::Path;
 
+pub mod lexer;
 pub mod parser;
 pub mod settings;
 pub mod structs;
