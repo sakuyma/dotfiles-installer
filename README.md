@@ -164,8 +164,7 @@ This tool may or may not work. If it breaks your system, you get to keep both pi
 ## Changelog
 
 ### v0.1.5
-- Fixed many many lint error (I HATE LINTER)
-
+- Package in AUR now
 
 ## Technical Debt
 
