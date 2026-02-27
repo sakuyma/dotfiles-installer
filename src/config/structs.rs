@@ -5,36 +5,52 @@ use std::sync::OnceLock;
 
 // ==================== CONFIG STRUCTURES ====================
 
+/// Git repository settings
 #[derive(Debug, Clone, Default)]
 pub struct GitConfig {
+    /// URL of the dotfiles repository
     pub repo: Option<String>,
+    /// Git branch to use (defaults to main/master if None)
     pub branch: Option<String>,
+    /// Local path where dotfiles will be cloned
     pub dotfiles_path: Option<String>,
 }
 
+/// Laptop-specific settings
 #[derive(Debug, Clone, Default)]
 pub struct LaptopConfig {
+    /// Whether to enable TLP power management
     pub enable_tlp: bool,
+    /// Whether to enable auto-cpufreq for dynamic frequency scaling
     pub enable_auto_cpufreq: bool,
 }
 
+/// System-wide configuration
 #[derive(Debug, Clone, Default)]
 pub struct SystemConfig {
+    /// System hostname
     pub hostname: Option<String>,
+    /// System timezone (e.g., "Europe/Moscow")
     pub timezone: Option<String>,
+    /// System locale (e.g., "en_US.UTF-8")
     pub locale: Option<String>,
 }
 
+/// Package groups collection
 #[derive(Debug, Clone, Default)]
 pub struct Packages {
+    /// Map of group name -> list of packages
     pub groups: HashMap<String, Vec<String>>,
 }
 
+/// Dependencies between package groups
 #[derive(Debug, Clone, Default)]
 pub struct Dependencies {
+    /// Map of group name -> list of dependencies (other group names)
     pub groups: HashMap<String, Vec<String>>,
 }
 
+/// Main configuration structure
 #[derive(Debug, Clone, Default)]
 pub struct Config {
     pub git: GitConfig,
@@ -50,7 +66,6 @@ static CONFIG: OnceLock<Config> = OnceLock::new();
 
 /// Initialize config with default path (~/.config/dotfiles-installer/config.conf)
 pub fn init() {
-    // Get home directory
     let home = match std::env::var("HOME") {
         Ok(h) => h,
         Err(_) => {
@@ -70,7 +85,7 @@ pub fn init() {
 
 /// Initialize config from specific path
 pub fn init_with_path(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    // Expand ~ if needed
+    // Expand tilde (~) to home directory if present
     let path = if path.starts_with("~/") {
         let home = std::env::var("HOME")?;
         path.replacen("~", &home, 1)

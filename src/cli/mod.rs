@@ -8,7 +8,7 @@ mod validator;
 
 // Re-export only what's actually used
 pub use args::Args;
-pub use handlers::{handle_subcommand, resolve_config_path};
+pub use handlers::handle_subcommand;
 pub use prompt_manager::PromptManager;
 pub use validator::validate_args;
 

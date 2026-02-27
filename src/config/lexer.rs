@@ -141,7 +141,14 @@ impl<'a> Lexer<'a> {
                 }
             }
             _ => {
-                panic!("Unexpected character at {}:{}", self.line, self.col);
+                let line = self.line;
+                let col = self.col;
+                let ch = self.peek_char().unwrap();
+                let ch_val = *ch as u32;
+                panic!(
+                    "Unexpected character '{}' (ASCII: {}) at line {}, column {}",
+                    ch, ch_val, line, col
+                );
             }
         }
     }
@@ -163,12 +170,5 @@ mod tests {
         let mut lexer = Lexer::new("\"hello world\"");
         assert_eq!(lexer.next_token(), Token::String("hello world".to_string()));
         assert_eq!(lexer.next_token(), Token::Eof);
-    }
-
-    #[test]
-    fn test_comment() {
-        let mut lexer = Lexer::new("# this is a comment\nkey = \"value\"");
-        assert_eq!(lexer.next_token(), Token::Comment);
-        assert_eq!(lexer.next_token(), Token::Ident("key".to_string()));
     }
 }

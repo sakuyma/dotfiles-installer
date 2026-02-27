@@ -20,8 +20,12 @@ impl Parser {
         }
     }
 
+    /// Parse a configuration file and return a map of keys to values
     pub fn parse_file(&mut self, path: &Path) -> Result<HashMap<String, Value>, String> {
-        let canonical = path.canonicalize().map_err(|e| format!("Cannot canonicalize path {}: {}", path.display(), e))?;
+        let canonical = path
+            .canonicalize()
+            .map_err(|e| format!("Cannot canonicalize path {}: {}", path.display(), e))?;
+
         if self.includes_processed.contains(&canonical) {
             return Err(format!("Circular include detected: {}", path.display()));
         }
@@ -29,6 +33,7 @@ impl Parser {
 
         let content = fs::read_to_string(path)
             .map_err(|e| format!("Failed to read {}: {}", path.display(), e))?;
+
         let mut lexer = Lexer::new(&content);
         let mut assignments = HashMap::new();
         let mut includes = Vec::new();
@@ -40,17 +45,28 @@ impl Parser {
                 Token::Include => {
                     // include = [ ... ]
                     if lexer.next_token() != Token::Equals {
-                        return Err(format!("Expected '=' after include at {}:{}", lexer.line, lexer.col));
+                        return Err(format!(
+                            "Expected '=' after include at {}:{}",
+                            lexer.line, lexer.col
+                        ));
                     }
                     let value = self.parse_value(&mut lexer)?;
                     match value {
                         Value::List(paths) => includes.extend(paths),
-                        _ => return Err(format!("Include must be a list at {}:{}", lexer.line, lexer.col)),
+                        _ => {
+                            return Err(format!(
+                                "Include must be a list at {}:{}",
+                                lexer.line, lexer.col
+                            ));
+                        }
                     }
                 }
                 Token::Ident(key) => {
                     if lexer.next_token() != Token::Equals {
-                        return Err(format!("Expected '=' after key '{}' at {}:{}", key, lexer.line, lexer.col));
+                        return Err(format!(
+                            "Expected '=' after key '{}' at {}:{}",
+                            key, lexer.line, lexer.col
+                        ));
                     }
                     let value = self.parse_value(&mut lexer)?;
                     assignments.insert(key, value);
@@ -59,10 +75,13 @@ impl Parser {
             }
         }
 
+        // Process includes recursively
         for include_path in includes {
             let base_dir = path.parent().unwrap_or(Path::new("."));
             let full_path = base_dir.join(include_path);
             let sub_config = self.parse_file(&full_path)?;
+
+            // Merge sub-config, with main file taking precedence
             for (k, v) in sub_config {
                 assignments.entry(k).or_insert(v);
             }
@@ -71,17 +90,42 @@ impl Parser {
         Ok(assignments)
     }
 
+    /// Parse a value (string or list) from the lexer
     fn parse_value(&self, lexer: &mut Lexer) -> Result<Value, String> {
         match lexer.next_token() {
             Token::String(s) => Ok(Value::String(s)),
             Token::ListStart => {
                 let mut items = Vec::new();
+                let mut last_was_comma = false;
+
                 loop {
-                    match lexer.next_token() {
-                        Token::String(s) => items.push(s),
-                        Token::ListEnd => break,
-                        Token::Comma => continue,
-                        _ => return Err(format!("Unexpected token in list at {}:{}", lexer.line, lexer.col)),
+                    let token = lexer.next_token();
+
+                    match token {
+                        Token::String(s) => {
+                            items.push(s);
+                            last_was_comma = false;
+                        }
+                        Token::Comma => {
+                            if last_was_comma {
+                                return Err(format!(
+                                    "Double comma in list at {}:{}",
+                                    lexer.line, lexer.col
+                                ));
+                            }
+                            last_was_comma = true;
+                        }
+                        Token::ListEnd => {
+                            // Allow trailing comma (just ignore it)
+                            break;
+                        }
+                        Token::Newline | Token::Comment => continue,
+                        _ => {
+                            return Err(format!(
+                                "Unexpected token in list at {}:{} (got {:?})",
+                                lexer.line, lexer.col, token
+                            ));
+                        }
                     }
                 }
                 Ok(Value::List(items))

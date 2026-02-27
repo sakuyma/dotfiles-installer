@@ -69,17 +69,23 @@ fn build_and_apply_config(raw: HashMap<String, parser::Value>) -> Result<(), Str
     let mut groups = HashMap::new();
     for (group_name, pkgs) in packages_map {
         let deps = dependencies_map.remove(&group_name).unwrap_or_default();
-        groups.insert(group_name, settings::PackageGroup {
-            packages: pkgs,
-            dependencies: deps,
-        });
+        groups.insert(
+            group_name,
+            settings::PackageGroup {
+                packages: pkgs,
+                dependencies: deps,
+            },
+        );
     }
     for (group_name, deps) in dependencies_map {
         eprintln!("Warning: dependencies for unknown group '{}'", group_name);
-        groups.insert(group_name, settings::PackageGroup {
-            packages: Vec::new(),
-            dependencies: deps,
-        });
+        groups.insert(
+            group_name,
+            settings::PackageGroup {
+                packages: Vec::new(),
+                dependencies: deps,
+            },
+        );
     }
 
     settings::initialize(git, groups, laptop);

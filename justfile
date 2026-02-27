@@ -149,7 +149,6 @@ pull:
 # Full development check (format, lint, test, build)
 dev-check:
     @echo "Running full development checks..."
-    just clean
     just fmt
     just lint
     just test

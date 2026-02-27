@@ -8,8 +8,8 @@ mod logging;
 mod packages;
 mod utils;
 
-use cli::*;
 use crate::formatter::*;
+use cli::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = cli::parse();
@@ -62,12 +62,14 @@ fn run_installation(
     }
 
     // Load config
-    let config_path = resolve_config_path(args)?;
-    if args.verbose {
-        log_step!("Config: {}", config_path);
+    if let Some(config_path) = &args.config {
+        if args.verbose {
+            log_step!("Config: {}", config_path);
+        }
+        config::init_with_path(config_path)?;
+    } else {
+        config::init();
     }
-    config::init_with_path(&config_path)?;
-
     // Determine which groups to install
     let groups = if args.groups.is_empty() {
         if prompts.interactive {
@@ -91,10 +93,9 @@ fn run_installation(
     show_plan(args, &groups);
 
     // Confirm overall installation
-    if !args.assume_yes
-        && !prompts.confirm("Proceed with installation?", false) {
-            log_warning!("Installation cancelled");
-            return Ok(());
+    if !args.assume_yes && !prompts.confirm("Proceed with installation?", false) {
+        log_warning!("Installation cancelled");
+        return Ok(());
     }
 
     // Execute with step confirmation

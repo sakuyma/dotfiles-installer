@@ -1,12 +1,11 @@
-use super::interactive::InteractivePrompt;
 use super::Args;
+use super::interactive::InteractivePrompt;
 
 pub struct PromptManager {
     pub interactive: bool,
     pub assume_yes: bool,
     pub quiet: bool,
     prompt: InteractivePrompt,
-    
 }
 
 impl PromptManager {
