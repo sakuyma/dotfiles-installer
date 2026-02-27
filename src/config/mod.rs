@@ -110,6 +110,7 @@ fn extract_bool(value: parser::Value) -> Result<bool, String> {
 fn extract_list(value: parser::Value) -> Result<Vec<String>, String> {
     match value {
         parser::Value::List(v) => Ok(v),
+
         _ => Err(format!("Expected list, got {:?}", value)),
     }
 }
