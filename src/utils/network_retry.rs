@@ -1,4 +1,5 @@
 use crate::cli::formatter::*;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::process::Command;
 use std::thread;
 use std::time::Duration;
@@ -122,7 +123,16 @@ pub fn check_internet_connection(host: &str, timeout_secs: u64) -> bool {
 
 /// Wait for internet connection with retries before proceeding with installation
 pub fn wait_for_internet(host: &str, max_attempts: u32, delay_secs: u64) -> Result<(), String> {
-    print_progress(&format!("Checking internet connection to {}...", host));
+    // Create spinner for visual feedback
+    let spinner = ProgressBar::new_spinner();
+    spinner.set_style(
+        ProgressStyle::default_spinner()
+            .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ ")
+            .template("{spinner:.green} {msg}")
+            .unwrap(),
+    );
+    spinner.enable_steady_tick(Duration::from_millis(100));
+    spinner.set_message(format!("Checking internet connection to {}...", host));
 
     let config = RetryConfig {
         max_attempts,
@@ -130,10 +140,10 @@ pub fn wait_for_internet(host: &str, max_attempts: u32, delay_secs: u64) -> Resu
         retryable_keywords: vec!["Network is unreachable", "Connection refused", "Timeout"],
     };
 
-    with_retry(
+    let result = with_retry(
         || {
             if check_internet_connection(host, 5) {
-                print_success("Internet connection is available");
+                spinner.finish_with_message("✓ Internet connection is available");
                 Ok(())
             } else {
                 Err(format!("Cannot reach {}", host))
@@ -141,7 +151,9 @@ pub fn wait_for_internet(host: &str, max_attempts: u32, delay_secs: u64) -> Resu
         },
         &config,
         "Internet connection check",
-    )
+    );
+
+    result
 }
 
 /// Main function to call before installation
@@ -152,7 +164,10 @@ pub fn ensure_internet_before_install() -> Result<(), String> {
     for &host in &hosts {
         match wait_for_internet(host, 2, 2) {
             Ok(()) => return Ok(()),
-            Err(e) => print_warning(&format!("Failed to reach {}: {}", host, e)),
+            Err(e) => {
+                // Use println instead of print_warning to avoid interfering with spinner
+                println!("⚠️  Failed to reach {}: {}", host, e);
+            }
         }
     }
 

@@ -118,7 +118,7 @@ Options:
 ## Roadmap (The "I'll get to it eventually" list)
 ### Coming up next
 
-- [ ] Progress bars - Watch the magic happen in real-time
+- [x] Progress bars - Watch the magic happen in real-time
 
 - [ ] Templates - Pre-made configs for common setups (desktop, server, potato)
 
