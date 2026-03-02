@@ -34,6 +34,10 @@ pub struct SystemConfig {
     pub timezone: Option<String>,
     /// System locale (e.g., "en_US.UTF-8")
     pub locale: Option<String>,
+    /// System sudoers
+    pub sudoers: Option<String>,
+    /// System hosts
+    pub hosts: Option<String>,
 }
 
 /// Package groups collection

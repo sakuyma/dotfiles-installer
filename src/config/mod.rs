@@ -88,7 +88,7 @@ fn build_and_apply_config(raw: HashMap<String, parser::Value>) -> Result<(), Str
         );
     }
 
-    settings::initialize(git, groups, laptop);
+    settings::initialize(git, groups, laptop, system);
     Ok(())
 }
 
