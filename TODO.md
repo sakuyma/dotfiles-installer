@@ -1,0 +1,5 @@
+- [ ] hostname
+- [ ] locale.gen
+- [ ] localtime
+- [ ] sudoers
+- [ ] hosts
