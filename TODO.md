@@ -1,4 +1,4 @@
-- [ ] hostname
+- [x] hostname
 - [ ] locale.gen
 - [ ] localtime
 - [ ] sudoers
