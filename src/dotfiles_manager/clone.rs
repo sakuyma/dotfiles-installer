@@ -143,6 +143,7 @@ pub fn clone_repo() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
+#[allow(dead_code)]
 pub fn clone_repo_with_depth() -> Result<(), Box<dyn std::error::Error>> {
     // Get config values
     let repo_url = match settings::dotfiles_repo() {
@@ -265,6 +266,7 @@ pub fn clone_repo_with_depth() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
+#[allow(dead_code)]
 pub fn clone_private_repo(
     username: &str,
     password: &str,

@@ -5,6 +5,7 @@ use std::fs;
 // Check if system is x86_64 architecture
 // Returns true for x86_64, false for everything else
 // (including your questionable life choices on ARM)
+#[allow(dead_code)]
 pub fn get_architecture() -> bool {
     let arch = env::consts::ARCH.to_string();
     if arch == "x86_64" {

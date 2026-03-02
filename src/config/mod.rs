@@ -11,8 +11,8 @@ pub fn init() {
     let git = settings::GitSettings::default();
     let laptop = settings::LaptopSettings::default();
     let groups = HashMap::new();
-    settings::initialize(git, groups, laptop);
-}
+    let system = settings::SystemSettings::default();    
+    settings::initialize(git, groups, laptop, system);}
 
 pub fn init_with_path(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     let path = if path.starts_with("~/") {
@@ -38,7 +38,7 @@ pub fn init_with_path(path: &str) -> Result<(), Box<dyn std::error::Error>> {
 fn build_and_apply_config(raw: HashMap<String, parser::Value>) -> Result<(), String> {
     let mut git = settings::GitSettings::default();
     let mut laptop = settings::LaptopSettings::default();
-    let mut packages_map: HashMap<String, Vec<String>> = HashMap::new();
+    let mut system = settings::SystemSettings::default();    let mut packages_map: HashMap<String, Vec<String>> = HashMap::new();
     let mut dependencies_map: HashMap<String, Vec<String>> = HashMap::new();
 
     for (key, value) in raw {
@@ -54,6 +54,15 @@ fn build_and_apply_config(raw: HashMap<String, parser::Value>) -> Result<(), Str
                 "laptop.enable_tlp" => laptop.enable_tlp = extract_bool(value)?,
                 "laptop.enable_auto_cpufreq" => laptop.enable_auto_cpufreq = extract_bool(value)?,
                 _ => eprintln!("Warning: unknown laptop key: {}", key),
+            }
+        } else if key.starts_with("system.") {
+            match key.as_str() {
+                "system.hostname" => system.hostname = extract_optional_string(value)?,
+                "system.locale" => system.locale = extract_optional_string(value)?,
+                "system.localtime" => system.localtime = extract_optional_string(value)?,
+                "system.sudoers" => system.sudoers = extract_optional_string(value)?,
+                "system.hosts" => system.hosts = extract_optional_string(value)?,
+                _ => eprintln!("Warning: unknown system key: {}", key),
             }
         } else if key.starts_with("packages.") {
             let group_name = key.trim_start_matches("packages.").to_string();
@@ -110,7 +119,6 @@ fn extract_bool(value: parser::Value) -> Result<bool, String> {
 fn extract_list(value: parser::Value) -> Result<Vec<String>, String> {
     match value {
         parser::Value::List(v) => Ok(v),
-
         _ => Err(format!("Expected list, got {:?}", value)),
     }
 }

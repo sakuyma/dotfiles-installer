@@ -1,5 +1,4 @@
-#![allow(dead_code)]
-
+#[allow(dead_code)]
 mod cli;
 mod config;
 mod dotfiles_manager;

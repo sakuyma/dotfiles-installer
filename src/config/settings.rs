@@ -21,7 +21,7 @@ pub struct LaptopSettings {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct SystemSettings{
+pub struct SystemSettings {
     pub hostname: Option<String>,
     pub locale: Option<String>,
     pub localtime: Option<String>,
@@ -54,7 +54,7 @@ pub fn laptop() -> &'static LaptopSettings {
     LAPTOP_CONFIG.get().expect("Laptop config not initialized")
 }
 
-pub fn system() -> &'static LaptopSettings {
+pub fn system() -> &'static SystemSettings {
     SYSTEM_CONFIG.get().expect("System config not initialized")
 }
 pub fn dotfiles_repo() -> Option<&'static String> {
@@ -96,7 +96,6 @@ pub fn system_sudoers() -> Option<&'static String> {
 pub fn system_hosts() -> Option<&'static String> {
     system().hosts.as_ref()
 }
-
 
 pub fn get_packages_for_groups(group_names: &[String]) -> Vec<String> {
     let mut packages = Vec::new();
