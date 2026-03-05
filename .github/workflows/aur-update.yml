@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Update PKGBUILD and push to AUR
         uses: kamack38/pkgbuild-update@v2.1.0
