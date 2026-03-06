@@ -46,17 +46,10 @@ pub fn package_groups() -> &'static HashMap<String, PackageGroup> {
         .expect("Package groups not initialized")
 }
 
-pub fn package_group(name: &str) -> Option<&'static PackageGroup> {
-    package_groups().get(name)
-}
-
 pub fn laptop() -> &'static LaptopSettings {
     LAPTOP_CONFIG.get().expect("Laptop config not initialized")
 }
 
-pub fn system() -> &'static SystemSettings {
-    SYSTEM_CONFIG.get().expect("System config not initialized")
-}
 pub fn dotfiles_repo() -> Option<&'static String> {
     git().repo.as_ref()
 }
@@ -75,41 +68,6 @@ pub fn is_tlp_enabled() -> bool {
 
 pub fn is_auto_cpufreq_enabled() -> bool {
     laptop().enable_auto_cpufreq
-}
-
-pub fn system_hostname() -> Option<&'static String> {
-    system().hostname.as_ref()
-}
-
-pub fn system_locale() -> Option<&'static String> {
-    system().locale.as_ref()
-}
-
-pub fn system_localtime() -> Option<&'static String> {
-    system().localtime.as_ref()
-}
-
-pub fn system_sudoers() -> Option<&'static String> {
-    system().sudoers.as_ref()
-}
-
-pub fn system_hosts() -> Option<&'static String> {
-    system().hosts.as_ref()
-}
-
-pub fn get_packages_for_groups(group_names: &[String]) -> Vec<String> {
-    let mut packages = Vec::new();
-    let groups = package_groups();
-
-    for name in group_names {
-        if let Some(group) = groups.get(name) {
-            packages.extend(group.packages.clone());
-        }
-    }
-
-    packages.sort();
-    packages.dedup();
-    packages
 }
 
 // Internal initialization function

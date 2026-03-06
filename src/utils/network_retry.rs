@@ -10,8 +10,6 @@ pub enum RetryStrategy {
     Fixed(u64),
     /// Exponential delay: 1s, 2s, 4s, 8s... (initial delay)
     Exponential(u64),
-    /// Linear delay: 1s, 2s, 3s, 4s... (step)
-    Linear(u64),
 }
 
 /// Retry configuration
@@ -93,7 +91,6 @@ where
                 let delay_secs = match config.strategy {
                     RetryStrategy::Fixed(delay) => delay,
                     RetryStrategy::Exponential(initial) => initial * 2u64.pow(attempt - 1),
-                    RetryStrategy::Linear(step) => step * attempt as u64,
                 };
 
                 print_progress(&format!("Waiting {} seconds before retry...", delay_secs));

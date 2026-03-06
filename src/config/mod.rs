@@ -5,7 +5,6 @@ use std::path::Path;
 pub mod lexer;
 pub mod parser;
 pub mod settings;
-pub mod structs;
 
 pub fn init() {
     let git = settings::GitSettings::default();
