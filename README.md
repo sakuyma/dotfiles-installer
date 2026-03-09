@@ -116,30 +116,8 @@ Options:
 
 
 ## Roadmap (The "I'll get to it eventually" list)
-### Coming up next
-
-- [x] Progress bars - Watch the magic happen in real-time
-
-- [ ] Templates - Pre-made configs for common setups (desktop, server, potato)
-
-- [ ] User management - Actually create users instead of just talking about it
-
-- [ ] System config - Set hostname, locale, timezone, etc without editing 15 files
-
-### Maybe someday
-
-- [ ] Config profiles - Different setups for different moods
-
-- [ ] System config - Set hostname, locale, timezone, etc without editing 15 files
-
-- [ ] Auto-commit - Because remembering to commit is so 2020 (automatic git commits when you change files)
-
-- [ ] Hooks - Run custom scripts because your setup is "special"
-
-- [ ] Rollback - For when things inevitably go wrong
-
-- [ ] Parallel - Make things faster by doing multiple things at once (maybe)
-
+There would'nt be any new updates.
+I archived project because it stopped be a "dotfiles-istaller", it's started beeing arch system configuration tool.
 
 ## Contributing
 
